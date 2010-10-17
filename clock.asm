@@ -8,7 +8,7 @@
 #include "header.inc"
 #include "mem.inc"
 #include "kernel.inc"
-#include "../../piclang/piclang.inc"
+#include "piclang.inc"
 #include "bin_7seg.inc"
 #include "stack.inc"
 #include "time.inc"
