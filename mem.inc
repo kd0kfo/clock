@@ -5,17 +5,13 @@
 ;CANNOT use memory at or above 70h. That is reserved by the kernel.
 
 ;Memory map for the pic project.
-	cblock 0x20
+	cblock 0x4c
 output
 counter
 minutes
 hours
 currSeg
 valueToLatch
-;total minutes since start of timer. why not? might come in handy later.
-;Middle of a 3byte counter of total minutes
-;end of total minutes segment. increment LOW, if carryover increment middle, if carryover increment high. if carryover... whoa!
-totalMinutesLOW: 1,totalMinutesMIDDLE,totalMinutesHIGH
 setTimeTmp
 resetTMR0;TMR0's initial value
 hexToOctal;memory spot for bit rotation
