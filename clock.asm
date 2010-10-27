@@ -88,7 +88,7 @@ MAIN_LOOP call SHOW_CLOCK
 PROGRAM_MODE INIT_STACK_MAC stackHead,stackPtr
 	PROGRAM_LOOP_MAC dipControl,controlPort,INPUT_BIT,instruction,RUN_PROGRAM,accumulator,exchange,MAIN_LOOP,WRITE_EEPROM,READ_EEPROM,PUSH_STACK,POP_STACK
 	;
-ERROR_RETURN nop;not sure what to do in case of error yet
+ERROR_RETURN clrf errorByte;not sure what to do in case of error yet
 	return
 	;
 ;Subroutines
