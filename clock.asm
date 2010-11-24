@@ -7,11 +7,14 @@
 	;
 #include "header.inc"
 #include "mem.inc"
-#include "kernel.inc"
-#include "piclang.inc"
-#include "bin_7seg.inc"
-#include "stack.inc"
-#include "time.inc"
+#include "../../picos/globals.inc"
+#include "../../picos/kernel_memory.inc"
+#include "../../picos/kernel.inc"
+#include "../../piclang/piclang.inc"
+#include "../../picos/bin_7seg.inc"
+#include "../../picos/stack.inc"
+#include "../../picos/time.inc"
+#include "../../picos/version.inc"
 
 	org 0x00
 	goto INIT
@@ -84,41 +87,15 @@ INIT INIT_KERNEL_MAC errorByte
 	;
 MAIN_LOOP call SHOW_CLOCK
 	MAIN_PROCESS_MAC CREATE_DISPLAY,DISPLAY_ME,controlPort,PROGRAM_MODE,MAIN_LOOP;generic process loop from kernel.asm
-	;
-PROGRAM_MODE INIT_STACK_MAC stackHead,stackPtr
-	PROGRAM_LOOP_MAC dipControl,controlPort,INPUT_BIT,instruction,RUN_PROGRAM,accumulator,exchange,MAIN_LOOP,WRITE_EEPROM,READ_EEPROM,PUSH_STACK,POP_STACK
+
+;bin 7-seg display macros
+CREATE_DISPLAY_MAC myStatus,minutes,hours,MAKE_PACKET,binaryMinute,binaryHours,controlPort,rightDisplay,SEG_VALUES,output,LOAD_PACKET,indicator,hexToOctal
+
 	;
 ERROR_RETURN nop;not sure what to do in case of error yet
 	return
 	;
-;Subroutines
-#include "program_subroutines.asm"
 	;macro calls
-	CREATE_DISPLAY_MAC myStatus,minutes,hours,MAKE_PACKET,binaryMinute,binaryHours,controlPort,rightDisplay,SEG_VALUES,output,LOAD_PACKET,indicator,hexToOctal 
-	LOAD_PACKET_MAC firstDisplay,currSeg,MAKE_PACKET,output,indicator
-	MAKE_PACKET_MAC tmp,myStatus 
-	SEG_VALUES_MAC pclTemp
-	DISPLAY_ME_MAC firstDisplay,outport,binaryHours,lastDisplay 	
-	PUSH_STACK_MAC stackTemp,stackPtr
-	POP_STACK_MAC stackPtr
-	GET_ARG_MAC programCounter,READ_EEPROM,PUSH_STACK
-	WRITE_EEPROM_MAC stackPtr
-	READ_EEPROM_MAC stackPtr
-	RUN_PROGRAM_MAC stackPtr,POP_STACK,PROGRAM_MAIN_FORK,programCounter,READ_EEPROM,instruction,EOP,RUN_COMMAND
-	RUN_COMMAND_MAC instruction,programCounter,RUN_COMMAND_TABLE
-	PICLANG_COMMAND_SET_MAC GET_ARG,POP_STACK,PUSH_STACK,accumulator,exchange,instruction,END_OF_FUNCTION,WRITE_EEPROM,leftDisplay,rightDisplay
-	PUSH_CALL_STACK_MAC callStackPtr,PUSH_STACK,POP_STACK,ERROR_RETURN,endOfMemory
-	POP_CALL_STACK_MAC callStackPtr,ERROR_RETURN
-	SUSPEND_PROCESS_MAC PUSH_CALL_STACK,accumulator,exchange,programCounter
-	RESUME_PROCESS_MAC POP_CALL_STACK,accumulator,exchange,programCounter,errorByte
-	BANK_MASK_MAC bankSelection
-	;
-	;clock stuff
-	ISR_INCREMENT_TIME_OF_DAY_MAC resetTMR0,TMR0,controlPort,myStatus,alarmHours,hours,alarmMinutes,minutes,INC_MINUTES,END_OF_INTERRUPT	
-	DISPLAY_TIME_MAC myStatus,indicator,dipControl,leftDisplay,rightDisplay,CREATE_DISPLAY
-	INCREMENT_TIME_MAC dateDay,dateMonth,minutes,hours,totalMinutesLOW,totalMinutesMIDDLE,totalMinutesHIGH,ISR_REST_TMR,NUMBER_OF_DAYS
-	TOGGLE_ALARM_MAC myStatus,ALARM_FLAG_TOGGLE
-	NUMBER_OF_DAYS_MAC pclTemp
 
 	;
 	END

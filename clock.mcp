@@ -25,12 +25,48 @@ subfolder_lib=
 subfolder_lkr=
 [FILE_SUBFOLDERS]
 file_000=.
+file_001=.
+file_002=.
+file_003=.
+file_004=.
+file_005=.
+file_006=.
+file_007=.
+file_008=.
+file_009=.
 [GENERATED_FILES]
 file_000=no
+file_001=no
+file_002=no
+file_003=no
+file_004=no
+file_005=no
+file_006=no
+file_007=no
+file_008=no
+file_009=no
 [OTHER_FILES]
 file_000=no
+file_001=no
+file_002=no
+file_003=no
+file_004=no
+file_005=no
+file_006=no
+file_007=no
+file_008=no
+file_009=no
 [FILE_INFO]
-file_000=C:\Documents and Settings\david\My Documents\projects\clock\picos\clock.asm
+file_000=clock.asm
+file_001=C:\Documents and Settings\david\My Documents\projects\picos\version.inc
+file_002=C:\Documents and Settings\david\My Documents\projects\picos\bin_7seg.inc
+file_003=C:\Documents and Settings\david\My Documents\projects\picos\globals.inc
+file_004=C:\Documents and Settings\david\My Documents\projects\picos\kernel.inc
+file_005=C:\Documents and Settings\david\My Documents\projects\picos\kernel_memory.inc
+file_006=C:\Documents and Settings\david\My Documents\projects\picos\stack.inc
+file_007=C:\Documents and Settings\david\My Documents\projects\picos\time.inc
+file_008=mem.inc
+file_009=header.inc
 [SUITE_INFO]
 suite_guid={6B3DAA78-59C1-46DD-B6AA-DBDAE4E06484}
 suite_state=generate-absolute-code

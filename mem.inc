@@ -5,7 +5,7 @@
 ;CANNOT use memory at or above 70h. That is reserved by the kernel.
 
 ;Memory map for the pic project.
-	cblock 0x4c
+	cblock 0x45
 output
 counter
 minutes
