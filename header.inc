@@ -2,7 +2,9 @@
 	list p=16f870
 	include <p16f870.inc>
 	radix hex
-	
+
+#include "mem.inc"
+
 #define outport PORTC
 #define outportTRIS TRISC
 #define controlPort PORTA
