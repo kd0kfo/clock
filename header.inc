@@ -4,6 +4,11 @@
 	radix hex
 
 #include "mem.inc"
+#include "../../picos/globals.inc"
+#include "../../picos/kernel.inc"
+#include "../../picos/kernel_memory.inc"
+#include "../../picos/stack.inc"
+
 
 #define outport PORTC
 #define outportTRIS TRISC

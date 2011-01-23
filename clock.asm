@@ -16,7 +16,11 @@ END_OF_INTERRUPT nop
 	retfie
 	;
 	
-INIT bcf STATUS,RP0
+INIT 
+	INIT_STACK_MAC stackHead,stackPtr
+	movlw 0x3
+	movwf low buffer_7seg + RIGHT_DISPLAY
+	bcf STATUS,RP0
 	bcf STATUS,RP1;
 	clrf controlPort
 	clrf dipControl
@@ -42,17 +46,131 @@ INIT bcf STATUS,RP0
     bsf INTCON,7       ; Enable global interrupt
     ;movf resetTMR0,W
 	;movwf TMR0; Count from c4 to overflow (60secs) then interrupt
-MAIN_LOOP 
+	call BANK_0
+	call DISPLAY_7seg
+MAIN_LOOP clrwdt
 	goto MAIN_LOOP
 
 ;bin 7-seg display macros
-CREATE_DISPLAY_MAC myStatus,minutes,hours,MAKE_PACKET,binaryMinute,binaryHours,controlPort,rightDisplay,SEG_VALUES,output,LOAD_PACKET,indicator,hexToOctal
+;CREATE_DISPLAY_MAC myStatus,minutes,hours,MAKE_PACKET,binaryMinute,binaryHours,controlPort,rightDisplay,SEG_VALUES,output,LOAD_PACKET,indicator,hexToOctal
+
+BANK_0 bcf STATUS,RP0
+	bcf STATUS,RP1
+	return
 
 	;
 ERROR_RETURN nop;not sure what to do in case of error yet
 	return
 	;
 	;macro calls
+STACK_MAC stackTemp,stackTemp2,stackPtr
+
+DISPLAY_7seg movf buffer_7seg + RIGHT_DISPLAY,W
+	andlw 0xf
+	call PUSH_STACK ; value to display
+	movlw RIGHT_DISPLAY ; left digit
+	call PUSH_STACK
+	movlw RIGHT_DISPLAY ; left 7seg
+	call PUSH_STACK
+	call DISPLAY_7seg_NIBBLE
+	return	
+
+DISPLAY_7seg_NIBBLE clrf temp7seg
+	call POP_STACK
+	xorlw LEFT_DISPLAY	
+	btfss STATUS,Z
+	bsf temp7seg,7
+	call POP_STACK
+	xorlw RIGHT_DISPLAY
+	btfss STATUS,Z
+	movlw 8
+	addwf temp7seg,W ; W-reg now holds the upper nibble of the 7-seg port data
+	movwf outport
+	call POP_STACK
+	call SEG_VALUES
+	movwf temp7seg
+	movlw 0x80
+	movwf temp
+	movlw 0x7
+	call PUSH_STACK ; temp counter
+DISPLAY_7seg_NIBBLE_LOOP movf temp,W
+	andwf temp7seg,W
+	btfsc STATUS,Z
+	goto DISPLAY_7seg_NIBBLE_LOOP_NEXT
+	movlw 0xf0
+	andwf outport,F
+	call POP_STACK
+	addwf outport,F
+	addlw 0xff ;; same as w--
+	call PUSH_STACK
+	clrwdt
+	call Delay50
+DISPLAY_7seg_NIBBLE_LOOP_NEXT bcf STATUS,C
+	rrf temp,F
+	btfss STATUS,C
+	goto DISPLAY_7seg_NIBBLE_LOOP
+	call POP_STACK ; temp counter
+	return
+	
+SEG_VALUES movwf pclTemp
+	movlw HIGH SEG_VALUES_TABLE
+	movwf PCLATH
+	movf pclTemp,W
+	addlw LOW SEG_VALUES_TABLE
+	btfsc STATUS,C
+	incf PCLATH,F
+	movwf PCL
+SEG_VALUES_TABLE retlw b'01111110';0
+	retlw b'00000110';1
+	retlw b'11011010';2
+	retlw b'11001110';3
+	retlw b'10100110';4
+	retlw b'11101100';5
+	retlw b'11111100';6
+	retlw b'01000110';7
+	retlw b'11111110';8
+	retlw b'11100110';9
+	retlw b'11110110';A
+	retlw b'10111100';B
+	retlw b'01111000';C
+	retlw b'10011110';D
+	retlw b'11111000';E
+	retlw b'11110000';F
+	retlw 0x1;decimal point
+
+Delay1s call Delay500
+	goto Delay500
+
+Delay500 call Delay255
+	call Delay100
+	call Delay100
+	call Delay20
+	call Delay20
+	goto Delay5
+
+Delay255	movlw	0xff		;delay 255 mS
+		goto	d0
+Delay100	movlw	d'100'		;delay 100mS
+		goto	d0
+Delay50		movlw	d'50'		;delay 50mS
+		goto	d0
+Delay20		movlw	d'20'		;delay 20mS
+		goto	d0
+Delay5		movlw	.5		;delay 5.000 ms (4 MHz clock)
+d0		movwf	count1
+d1		movlw	0x63			;delay 1mS
+		movwf	counta
+		movlw	0x01
+		movwf	countb
+Delay_0
+		decfsz	counta, f
+		goto	$+2
+		decfsz	countb, f
+		goto	Delay_0
+
+		decfsz	count1	,f
+		goto	d1
+		retlw	0x00
 
 	;
 	END
