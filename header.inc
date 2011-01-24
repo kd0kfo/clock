@@ -3,6 +3,8 @@
 	include <p16f870.inc>
 	radix hex
 
+	__config _WDT_OFF
+
 #include "mem.inc"
 #include "../../picos/globals.inc"
 #include "../../picos/kernel.inc"

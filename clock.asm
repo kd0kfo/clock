@@ -18,7 +18,7 @@ END_OF_INTERRUPT nop
 	
 INIT 
 	INIT_STACK_MAC stackHead,stackPtr
-	movlw 0x3
+	movlw 0xc3
 	movwf low buffer_7seg + RIGHT_DISPLAY
 	bcf STATUS,RP0
 	bcf STATUS,RP1;
@@ -47,8 +47,8 @@ INIT
     ;movf resetTMR0,W
 	;movwf TMR0; Count from c4 to overflow (60secs) then interrupt
 	call BANK_0
-	call DISPLAY_7seg
-MAIN_LOOP clrwdt
+	
+MAIN_LOOP call DISPLAY_7seg
 	goto MAIN_LOOP
 
 ;bin 7-seg display macros
@@ -70,16 +70,34 @@ DISPLAY_7seg movf buffer_7seg + RIGHT_DISPLAY,W
 	call PUSH_STACK ; value to display
 	movlw RIGHT_DISPLAY ; left digit
 	call PUSH_STACK
-	movlw RIGHT_DISPLAY ; left 7seg
+	movlw LEFT_DISPLAY ; left 7seg
+	call PUSH_STACK
+	call DISPLAY_7seg_NIBBLE
+	swapf buffer_7seg+RIGHT_DISPLAY,W
+	andlw 0xf
+	call PUSH_STACK
+	movlw LEFT_DISPLAY
+	call PUSH_STACK
+	movlw LEFT_DISPLAY
 	call PUSH_STACK
 	call DISPLAY_7seg_NIBBLE
 	return	
 
+;Displays a nibble on the set of 7-seg displays
+; Left and right sides are determined using the
+; "LEFT_DISPLAY" and "RIGHT_DISPLAY" define values.
+;
+;Arguments: From top of stack downwards:
+;	Top)  Left or Right pair of displays
+;   Next) Left Digit or Right Digit
+;	Next) Nibble to be displayed.
 DISPLAY_7seg_NIBBLE clrf temp7seg
 	call POP_STACK
 	xorlw LEFT_DISPLAY	
 	btfss STATUS,Z
 	bsf temp7seg,7
+	btfsc STATUS,Z
+	bsf temp7seg,4
 	call POP_STACK
 	xorlw RIGHT_DISPLAY
 	btfss STATUS,Z
@@ -97,15 +115,15 @@ DISPLAY_7seg_NIBBLE_LOOP movf temp,W
 	andwf temp7seg,W
 	btfsc STATUS,Z
 	goto DISPLAY_7seg_NIBBLE_LOOP_NEXT
-	movlw 0xf0
+	movlw 0xf8
 	andwf outport,F
-	call POP_STACK
+	call PEEK_STACK
 	addwf outport,F
+	;call Delay50
+DISPLAY_7seg_NIBBLE_LOOP_NEXT call POP_STACK
 	addlw 0xff ;; same as w--
 	call PUSH_STACK
-	clrwdt
-	call Delay50
-DISPLAY_7seg_NIBBLE_LOOP_NEXT bcf STATUS,C
+	bcf STATUS,C
 	rrf temp,F
 	btfss STATUS,C
 	goto DISPLAY_7seg_NIBBLE_LOOP
