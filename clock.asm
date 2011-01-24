@@ -48,7 +48,7 @@ INIT
 	;movwf TMR0; Count from c4 to overflow (60secs) then interrupt
 	call BANK_0
 	
-MAIN_LOOP call DISPLAY_7seg
+MAIN_LOOP call DISPLAY_BINARY
 	goto MAIN_LOOP
 
 ;bin 7-seg display macros
@@ -64,6 +64,33 @@ ERROR_RETURN nop;not sure what to do in case of error yet
 	;
 	;macro calls
 STACK_MAC stackTemp,stackTemp2,stackPtr
+
+DISPLAY_BINARY swapf buffer_7seg + RIGHT_DISPLAY,W
+	andlw 0xf
+	call PUSH_STACK
+	movlw LEFT_DISPLAY
+	call PUSH_STACK
+	call DISPLAY_BINARY_NIBBLE
+	movf buffer_7seg + RIGHT_DISPLAY,W
+	andlw 0xf
+	call PUSH_STACK
+	movlw RIGHT_DISPLAY
+	call PUSH_STACK
+	call DISPLAY_BINARY_NIBBLE
+	return
+
+DISPLAY_BINARY_NIBBLE call POP_STACK
+	xorlw LEFT_DISPLAY
+	btfsc STATUS,Z
+	bsf outport,7
+	btfss STATUS,Z
+	bcf outport,7
+	bsf outport,6
+	movlw 0xC0
+	andwf outport,F
+	call POP_STACK
+	addwf outport,F
+	goto Delay20
 
 DISPLAY_7seg movf buffer_7seg + RIGHT_DISPLAY,W
 	andlw 0xf
