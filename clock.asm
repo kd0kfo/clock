@@ -11,8 +11,10 @@
 	goto INIT
 	;
 	org 0x04
-	;more interrupt stuff can go here
-END_OF_INTERRUPT nop
+	START_INTERRUPT saveW,interruptBankSave,bankSelection,SAVE_BANK
+INTERRUPT_CHECKED_TIME
+END_OF_INTERRUPT 
+FINISH_INTERRUPT saveW,interruptBankSave,bankSelection,RESET_BANK
 	retfie
 	;
 	
@@ -47,16 +49,19 @@ INIT
     ;movf resetTMR0,W
 	;movwf TMR0; Count from c4 to overflow (60secs) then interrupt
 	call BANK_0
+	clrf btn_state		; it's in the same bank as seconds :-/
+	clrf btn_counter
+	clrf btn_buffer
+	clrf btn_pressed
 	
-MAIN_LOOP call DISPLAY_BINARY
+MAIN_LOOP call GET_BUTTON_STATE
+	movwf buffer_7seg + RIGHT_DISPLAY
+	call DISPLAY_BINARY
+	call DISPLAY_7SEG
 	goto MAIN_LOOP
 
 ;bin 7-seg display macros
 ;CREATE_DISPLAY_MAC myStatus,minutes,hours,MAKE_PACKET,binaryMinute,binaryHours,controlPort,rightDisplay,SEG_VALUES,output,LOAD_PACKET,indicator,hexToOctal
-
-BANK_0 bcf STATUS,RP0
-	bcf STATUS,RP1
-	return
 
 	;
 ERROR_RETURN nop;not sure what to do in case of error yet
@@ -64,6 +69,7 @@ ERROR_RETURN nop;not sure what to do in case of error yet
 	;
 	;macro calls
 STACK_MAC stackTemp,stackTemp2,stackPtr
+BANK_MASK_MAC bankSelection
 
 DISPLAY_BINARY swapf buffer_7seg + RIGHT_DISPLAY,W
 	andlw 0xf
@@ -90,24 +96,24 @@ DISPLAY_BINARY_NIBBLE call POP_STACK
 	andwf outport,F
 	call POP_STACK
 	addwf outport,F
-	goto Delay20
+	return;goto Delay20
 
-DISPLAY_7seg movf buffer_7seg + RIGHT_DISPLAY,W
+DISPLAY_7SEG movf buffer_7seg + RIGHT_DISPLAY,W
 	andlw 0xf
 	call PUSH_STACK ; value to display
 	movlw RIGHT_DISPLAY ; left digit
 	call PUSH_STACK
-	movlw LEFT_DISPLAY ; left 7seg
+	movlw RIGHT_DISPLAY ; left 7seg
 	call PUSH_STACK
-	call DISPLAY_7seg_NIBBLE
+	call DISPLAY_7SEG_NIBBLE
 	swapf buffer_7seg+RIGHT_DISPLAY,W
 	andlw 0xf
 	call PUSH_STACK
 	movlw LEFT_DISPLAY
 	call PUSH_STACK
-	movlw LEFT_DISPLAY
+	movlw RIGHT_DISPLAY
 	call PUSH_STACK
-	call DISPLAY_7seg_NIBBLE
+	call DISPLAY_7SEG_NIBBLE
 	return	
 
 ;Displays a nibble on the set of 7-seg displays
@@ -118,7 +124,7 @@ DISPLAY_7seg movf buffer_7seg + RIGHT_DISPLAY,W
 ;	Top)  Left or Right pair of displays
 ;   Next) Left Digit or Right Digit
 ;	Next) Nibble to be displayed.
-DISPLAY_7seg_NIBBLE clrf temp7seg
+DISPLAY_7SEG_NIBBLE clrf temp7seg
 	call POP_STACK
 	xorlw LEFT_DISPLAY	
 	btfss STATUS,Z
@@ -216,6 +222,27 @@ Delay_0
 		decfsz	count1	,f
 		goto	d1
 		retlw	0x00
+
+DEBOUNCE_BUTTONS_MAC btn_state,btn_buffer,btn_pressed
+GET_BUTTON_STATE movlw 0
+	btfsc BTN_PORT,BTN1
+	addlw .1
+	btfsc BTN_PORT,BTN2
+	addlw .2
+	btfsc BTN_PORT,BTN3
+	addlw .4
+	btfsc BTN_PORT,BTN4
+	addlw .8
+	btfsc BTN_PORT,BTN5
+	addlw 0x10
+	btfsc BTN_PORT,BTN6
+	addlw 0x20
+	btfsc BTN_PORT,BTN7
+	addlw 0x40
+	btfsc BTN_PORT,BTN8
+	addlw 0x80
+	return
+
 
 	;
 	END

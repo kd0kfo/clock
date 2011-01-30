@@ -10,6 +10,7 @@
 #include "../../picos/kernel.inc"
 #include "../../picos/kernel_memory.inc"
 #include "../../picos/stack.inc"
+#include "../../picos/io.inc"
 
 
 #define outport PORTC
@@ -18,6 +19,16 @@
 #define controlPortTRIS TRISA
 #define dipControl PORTB
 #define dipControlTRIS TRISB
+
+#define BTN_PORT PORTB
+#define BTN1 0
+#define BTN2 1
+#define BTN3 2
+#define BTN4 3
+#define BTN5 4
+#define BTN6 5
+#define BTN7 6
+#define BTN8 7
 
 ;In the follwing bit definitions, the first word/phrase indicates
 ;the meaning of Logic 1 and the second word/phrase indicates

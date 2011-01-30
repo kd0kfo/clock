@@ -10,4 +10,5 @@ hours:1,minutes
 alarmHours:1,alarmMinutes
 dateMonth: 1,dateDay
 count1:1,counta,countb
+btn_state:1,btn_buffer,btn_pressed,btn_counter
 	endc
