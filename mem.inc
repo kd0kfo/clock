@@ -12,3 +12,4 @@ dateMonth: 1,dateDay
 count1:1,counta,countb
 btn_state:1,btn_buffer,btn_pressed,btn_counter
 	endc
+#define END_OF_MEMORY btn_counter

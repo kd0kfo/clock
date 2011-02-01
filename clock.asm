@@ -11,19 +11,26 @@
 	goto INIT
 	;
 	org 0x04
-	START_INTERRUPT saveW,interruptBankSave,bankSelection,SAVE_BANK
-INTERRUPT_CHECKED_TIME
+	movlw 0xc4
+	movwf TMR0; Count from c4 to overflow (60secs) then interrupt
+	incf low buffer_7seg + LEFT_DISPLAY,F
+	bcf INTCON,2
 END_OF_INTERRUPT 
-FINISH_INTERRUPT saveW,interruptBankSave,bankSelection,RESET_BANK
 	retfie
+INTERRUPT_CHECKED_TIME return
+
 	;
 	
 INIT 
 	INIT_STACK_MAC stackHead,stackPtr
-	movlw 0xc3
+	movlw 0x0
 	movwf low buffer_7seg + RIGHT_DISPLAY
+	movwf low buffer_7seg + LEFT_DISPLAY
 	bcf STATUS,RP0
 	bcf STATUS,RP1;
+	;movf resetTMR0,W
+	movlw 0xc4
+	movwf TMR0; Count from c4 to overflow (60secs) then interrupt
 	clrf controlPort
 	clrf dipControl
 	clrf outport
@@ -33,31 +40,32 @@ INIT
 	movlw 0x6;
 	movwf ADCON1;SET bit 0 of porta to be digital (not analog :-/ )
 	movlw b'00010001';TIMER MUST BE INPUT!!!
-	movwf controlPortTRIS;bit 0 = hex/~octal, bit 1 = external alarm trigger, 4 = timer0 clock
+	movwf TRISA;bit 0 = hex/~octal, bit 1 = external alarm trigger, 4 = timer0 clock
 	movlw b'11111111';Oh, yeah. dip switch keyboard
 	movwf dipControlTRIS;bit 7 = trigger for dip switch commands.
-	bsf OPTION_REG,5;turn on timer0
-	bcf OPTION_REG,4;time on leading edge of T0CKI
+	bsf OPTION_REG,T0CS;turn on timer0
+	bcf OPTION_REG,T0SE;time on leading edge of T0CKI
 	bcf STATUS,RP0
 	;
 	bcf STATUS,0       ; Clear carry bit
     bcf STATUS,2       ; Clear zero flag
     bcf STATUS,1       ;
-    bsf INTCON,5       ; Enable timer0 interrupt
+    bsf INTCON,T0IE       ; Enable timer0 interrupt
     bcf INTCON,2       ; Clear interrupt flag
     bsf INTCON,7       ; Enable global interrupt
-    ;movf resetTMR0,W
-	;movwf TMR0; Count from c4 to overflow (60secs) then interrupt
-	call BANK_0
+    call BANK_0
 	clrf btn_state		; it's in the same bank as seconds :-/
 	clrf btn_counter
 	clrf btn_buffer
 	clrf btn_pressed
+	clrf minutes
 	
-MAIN_LOOP call GET_BUTTON_STATE
+MAIN_LOOP movlw 0xc4
+	subwf TMR0,W
 	movwf buffer_7seg + RIGHT_DISPLAY
 	call DISPLAY_BINARY
 	call DISPLAY_7SEG
+	call DEBOUNCE_BUTTONS
 	goto MAIN_LOOP
 
 ;bin 7-seg display macros
@@ -98,7 +106,9 @@ DISPLAY_BINARY_NIBBLE call POP_STACK
 	addwf outport,F
 	return;goto Delay20
 
-DISPLAY_7SEG movf buffer_7seg + RIGHT_DISPLAY,W
+DISPLAY_7SEG 
+DISPLAY_7SEG_RIGHT
+	movf buffer_7seg + RIGHT_DISPLAY,W
 	andlw 0xf
 	call PUSH_STACK ; value to display
 	movlw RIGHT_DISPLAY ; left digit
@@ -112,6 +122,23 @@ DISPLAY_7SEG movf buffer_7seg + RIGHT_DISPLAY,W
 	movlw LEFT_DISPLAY
 	call PUSH_STACK
 	movlw RIGHT_DISPLAY
+	call PUSH_STACK
+	call DISPLAY_7SEG_NIBBLE
+DISPLAY_7SEG_LEFT
+	movf buffer_7seg + LEFT_DISPLAY,W
+	andlw 0xf
+	call PUSH_STACK ; value to display
+	movlw RIGHT_DISPLAY ; left digit
+	call PUSH_STACK
+	movlw LEFT_DISPLAY ; left 7seg
+	call PUSH_STACK
+	call DISPLAY_7SEG_NIBBLE
+	swapf buffer_7seg+LEFT_DISPLAY,W
+	andlw 0xf
+	call PUSH_STACK
+	movlw LEFT_DISPLAY
+	call PUSH_STACK
+	movlw LEFT_DISPLAY
 	call PUSH_STACK
 	call DISPLAY_7SEG_NIBBLE
 	return	
