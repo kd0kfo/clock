@@ -1,36 +1,15 @@
-#define END_OF_MEMORY low endOfMemory
-#define BEGINNING_OF_MEMORY low beginningOfMemory
-#define STACK_LENGTH 0x8
+#define STACK_LENGTH 8
+#define LEFT_DISPLAY 0
+#define RIGHT_DISPLAY 1
 
-;CANNOT use memory at or above 70h. That is reserved by the kernel.
-
-;Memory map for the pic project.
-	cblock 0x4c
-output
-counter
-minutes
-hours
-currSeg
-valueToLatch
-setTimeTmp
-resetTMR0;TMR0's initial value
-hexToOctal;memory spot for bit rotation
-lsdMinute:8
-msdMinute:8;7-seg packets for digits
-lsdHour:8
-msdHour:8
-binaryMinute:1,binaryHours;binary packets
-firstDisplay:1,lastDisplay;7-seg data
-alarmMinutes:1,alarmHours;Alarm Clock! cf myStatus
-leftDisplay:1,rightDisplay;Display place holders to make create display more generic. to show time, load minutes/hours into it.
-indicator;which decimal to light (tells a story)
-stackTemp
-dateDay:1,dateMonth
+	cblock 0x45
 stackHead:STACK_LENGTH
-endOfMemory
+buffer_7seg:2
+temp7seg
+hours:1,minutes
+alarmHours:1,alarmMinutes
+dateMonth: 1,dateDay
+count1:1,counta,countb
+btn_state:1,btn_buffer,btn_pressed,btn_counter
 	endc
-	
-INIT_MEMORY_MAC macro endOfMemory
-	movlw END_OF_MEMORY
-	movwf endOfMemory;So I can keep track of when my "name space" ends
-	endm
+#define END_OF_MEMORY btn_counter
