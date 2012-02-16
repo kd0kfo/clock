@@ -11,6 +11,7 @@
 #include "../../picos/kernel_memory.inc"
 #include "../../picos/stack.inc"
 #include "../../picos/io.inc"
+#include "../../picos/time.inc"
 
 
 #define outport PORTC
@@ -19,6 +20,8 @@
 #define controlPortTRIS TRISA
 #define dipControl PORTB
 #define dipControlTRIS TRISB
+
+#define EDIT_BUTTON PORTA,0
 
 #define BTN_PORT PORTB
 #define BTN1 0
@@ -54,4 +57,19 @@
 #define TIMER0_CLK 4
 #define INITIAL_TIMER_VALUE 0xc4
 
+;time stuff
+#define RESET_CLOCK_VALUE 0xc4
 #define INCREMENT_TIME_INTERRUPT INTCON,T0IF
+#define CLOCK_TIMER_FLAG INTCON,2
+
+;commands
+#define SET_MINUTES_CODE 0
+#define SET_HOURS_CODE 1
+#define SET_ALARM_MINUTES_CODE 2
+#define SET_ALARM_HOURS_CODE 3
+#define SET_ALARM_DAY_CODE 4
+#define SET_DAY_CODE 5
+#define SET_MONTH_CODE 6
+#define TOGGLE_ALARM_CODE 7
+#define SHOW_DATE_CODE 0x8
+#define TOGGLE_HEX_OCTAL_CODE 0x10
