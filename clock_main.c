@@ -2,6 +2,7 @@
   const TIME_t *time = NULL;
   char digits[2];
   char last_time = 0;
+  char input;
 
   TIME_init();
   time = TIME_get();
@@ -23,6 +24,12 @@
 	  hex_to_word(digits, time->seconds);
 	  clock_write_double_digit(digits);
 	  
+	  poll_input();
+	  if(input != button_state)
+	    {
+	      input = button_state;
+	    }
+	    
 	}
     }
 }

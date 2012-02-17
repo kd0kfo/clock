@@ -18,6 +18,7 @@
 #define BTN7 RB6
 #define BTN8 RB7
 
+#define EDIT_BUTTON RA0
 
 // display
 #define DISPLAY_PORT PORTC
@@ -30,8 +31,11 @@ typedef int bit;
 
 char BTN_PORT;
 char DISPLAY_PORT;
+char EDIT_BUTTON;
 
 #endif
 
+char button_state;
+extern char poll_input();
 
-#endif
+#endif//clock_defines_h

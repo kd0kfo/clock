@@ -20,11 +20,20 @@
 #include <errno.h>
 
 bit use_hex_output;
-WINDOW *wnd = NULL, *seg7_wnd = NULL, *binary_wnd = NULL, *debug_wnd = NULL;
+WINDOW *wnd = NULL, *seg7_wnd = NULL, *binary_wnd = NULL, *button_wnd = NULL;
 #define SEG7_WIDTH  25
 #define SEG7_HEIGHT  5
 #define BINARY_WIDTH  20
 #define BINARY_HEIGHT  5
+
+void update_buttons()
+{
+  char button_buffer[8];
+  
+  binary_to_octuplet(button_buffer,button_state);
+  mvwprintw(button_wnd,1,1,"%s  %c",button_buffer,((EDIT_BUTTON)?'1':'0'));
+}
+
 
 void update_curses()
 {
@@ -36,6 +45,10 @@ void update_curses()
   core_to_curses();
   scheduler_to_curses();
   buffer_to_curses();*/
+  
+  update_buttons();
+  
+  
   touchwin(wnd);
   refresh();
 }
@@ -43,6 +56,28 @@ void IO_flush(){}
 void clear_output()
 {
   update_curses();
+}
+
+char poll_input()
+{
+  int val = getch();
+  if(val == ERR)
+    return button_state;
+  
+  if(val == 0xa)
+    {
+      EDIT_BUTTON ^= 1;
+      return button_state;
+    }
+
+  if(val < '1' || val > '8')
+    return button_state;
+  
+  val -= '1';
+  val = 1 << val;
+  
+  button_state ^= (char)(val & 0xff);
+  
 }
 
 
@@ -210,6 +245,8 @@ void main(void)
   /** LINUX SIM SETUP **/
   usart_init();
   wnd = initscr();
+  nodelay(wnd,true);
+  
   noecho();
   keypad(wnd,true);
   mvwprintw(wnd,0,1,"7seg");
@@ -219,6 +256,10 @@ void main(void)
   mvwprintw(wnd,0,SEG7_WIDTH+5,"Binary");
   binary_wnd = subwin(wnd,BINARY_HEIGHT,BINARY_WIDTH,1,SEG7_WIDTH+5);
   box(binary_wnd,ACS_VLINE,ACS_HLINE);
+
+  mvwprintw(wnd,SEG7_HEIGHT+3,1,"Buttons");
+  button_wnd = subwin(wnd,4,SEG7_WIDTH,SEG7_HEIGHT+4,1);
+  box(button_wnd,ACS_VLINE,ACS_HLINE);
 
   refresh();
   fake_eeprom = fopen("fake_eeprom","r+");
