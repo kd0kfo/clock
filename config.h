@@ -40,6 +40,6 @@ char EDIT_BUTTON;
 
 char button_state;
 char edit_mode;
-extern char poll_input();
 
+extern signed char do_command(char command);
 #endif//clock_defines_h

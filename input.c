@@ -6,6 +6,8 @@
 #include "curses.h"
 #endif
 
+#include "picfs_error.h"
+
 char poll_input()
 {
   int val = getch();
@@ -31,3 +33,17 @@ char poll_input()
   button_state ^= (char)(val & 0xff);
   
 }
+
+signed char do_command(char command)
+{
+  signed char retval = SUCCESS;
+  switch(command)
+    {
+    default:
+      retval = PICLANG_UNKNOWN_COMMAND;
+      break;
+    }
+
+  return retval;
+}
+

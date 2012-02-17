@@ -56,7 +56,8 @@ void update_curses()
 void IO_flush(){}
 void clear_output()
 {
-  update_curses();
+  wclear(seg7_wnd);
+  wclear(binary_wnd);
 }
 
 

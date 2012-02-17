@@ -25,7 +25,21 @@
 	  clock_write_double_digit(digits);
 	  
 	  poll_input();
-	  
+
+	  if(edit_mode)
+	    {
+	      clear_output();
+	      while(edit_mode)
+		{
+		  clock_set_display_side(LEFT);
+		  hex_to_word(digits,button_state);
+		  clock_write_double_digit(digits);
+		  poll_input();
+		  continue;
+		}
+	      do_command(button_state);
+	    }
+
 	  
 	}
     }
