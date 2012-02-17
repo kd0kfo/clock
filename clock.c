@@ -32,7 +32,14 @@ void TIME_init()
 
 }
 
-
+int getch()
+{
+  int button_buffer = BTN_PORT;
+  char edit_button_val = 0;
+  
+  return button_buffer;
+  
+}
 
 void interrupt isr()
 {

@@ -31,7 +31,8 @@ void update_buttons()
   char button_buffer[8];
   
   binary_to_octuplet(button_buffer,button_state);
-  mvwprintw(button_wnd,1,1,"%s  %c",button_buffer,((EDIT_BUTTON)?'1':'0'));
+  mvwprintw(button_wnd,1,1,"%s  %c",button_buffer,((edit_mode)?'1':'0'));
+  
 }
 
 
@@ -58,27 +59,7 @@ void clear_output()
   update_curses();
 }
 
-char poll_input()
-{
-  int val = getch();
-  if(val == ERR)
-    return button_state;
-  
-  if(val == 0xa)
-    {
-      EDIT_BUTTON ^= 1;
-      return button_state;
-    }
 
-  if(val < '1' || val > '8')
-    return button_state;
-  
-  val -= '1';
-  val = 1 << val;
-  
-  button_state ^= (char)(val & 0xff);
-  
-}
 
 
 char display_data = 0;

@@ -23,8 +23,11 @@
 // display
 #define DISPLAY_PORT PORTC
 
+#define ERR 0xff
+
 // define putch
 #define putch(X) putch_clock_display(X)
+extern int getch();
 #else // NOT LINUX_SIM
 
 typedef int bit;
@@ -36,6 +39,7 @@ char EDIT_BUTTON;
 #endif
 
 char button_state;
+char edit_mode;
 extern char poll_input();
 
 #endif//clock_defines_h

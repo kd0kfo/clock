@@ -25,11 +25,8 @@
 	  clock_write_double_digit(digits);
 	  
 	  poll_input();
-	  if(input != button_state)
-	    {
-	      input = button_state;
-	    }
-	    
+	  
+	  
 	}
     }
 }
