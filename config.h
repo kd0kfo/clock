@@ -18,6 +18,10 @@
 #define BTN7 RB6
 #define BTN8 RB7
 
+
+// display
+#define DISPLAY_PORT PORTC
+
 // define putch
 #define putch(X) putch_clock_display(X)
 #else // NOT LINUX_SIM
@@ -25,10 +29,9 @@
 typedef int bit;
 
 char BTN_PORT;
+char DISPLAY_PORT;
 
 #endif
-
-extern const char table_7seg[];
 
 
 #endif

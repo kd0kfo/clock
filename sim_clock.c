@@ -2,6 +2,8 @@
 #include "config.h"
 #endif
 
+#include "7seg.h"
+
 #include "picfs_error.h"
 #include "scheduler.h"
 #include "picos_time.h"
@@ -19,10 +21,10 @@
 
 bit use_hex_output;
 WINDOW *wnd = NULL, *seg7_wnd = NULL, *binary_wnd = NULL, *debug_wnd = NULL;
-#define SEG7_WIDTH  10
-#define SEG7_HEIGHT  10
-#define BINARY_WIDTH  10
-#define BINARY_HEIGHT  10
+#define SEG7_WIDTH  25
+#define SEG7_HEIGHT  5
+#define BINARY_WIDTH  20
+#define BINARY_HEIGHT  5
 
 void update_curses()
 {
@@ -45,15 +47,66 @@ void clear_output()
 
 
 char display_data = 0;
-void set_display_data(char val){}
+void set_display_data(char val){display_data = val;}
 void putch(char c)
 { 
+  int curr_line = 1,curr_column = 2;
   putch_clock_display(c);
   
-  
+
   //delch();
+  //wclear(seg7_wnd);
   box(seg7_wnd,ACS_VLINE,ACS_HLINE);
-  wprintw(seg7_wnd,"%c",c);
+  wmove(seg7_wnd, curr_line,1);
+  if(clock_get_display_side() == RIGHT)
+    curr_column += 12;
+  if(clock_get_digit() == RIGHT)
+    curr_column += 5;
+  if((display_data & 0x40) != 0)
+    mvwprintw(seg7_wnd,curr_line,curr_column," --- ");
+  else
+    mvwprintw(seg7_wnd,curr_line,curr_column,"     ");
+  curr_line++;
+
+  if((display_data & 0x20) != 0)
+    mvwprintw(seg7_wnd,curr_line,curr_column,"|");
+  else
+    mvwprintw(seg7_wnd,curr_line,curr_column," ");
+  if((display_data & 0x02) != 0)
+    mvwprintw(seg7_wnd,curr_line,curr_column+4,"|");
+  else
+    mvwprintw(seg7_wnd,curr_line,curr_column+4," ");
+  curr_line++;
+
+  if((display_data & 0x80) != 0)
+    mvwprintw(seg7_wnd,curr_line,curr_column," --- ");
+  else
+    mvwprintw(seg7_wnd,curr_line,curr_column,"     ");
+  curr_line++;
+
+  if((display_data & 0x10) != 0)
+    mvwprintw(seg7_wnd,curr_line,curr_column,"|");
+  else
+    mvwprintw(seg7_wnd,curr_line,curr_column," ");
+  if((display_data & 0x04) != 0)
+    mvwprintw(seg7_wnd,curr_line,curr_column+4,"|");
+  else
+    mvwprintw(seg7_wnd,curr_line,curr_column+4," ");
+  curr_line++;
+
+  if((display_data & 0x08) != 0)
+    mvwprintw(seg7_wnd,curr_line,curr_column," --- ");
+  else
+    mvwprintw(seg7_wnd,curr_line,curr_column,"     ");
+  curr_line++;
+
+#if 0// do not use 7-seg  
+  if(display_data == 1)
+    mvwprintw(seg7_wnd,curr_line,curr_column+4,".");
+  else
+    mvwprintw(seg7_wnd,curr_line,curr_column+4," ");
+#endif
+  
   update_curses();
 
 }
@@ -73,6 +126,13 @@ void interrupt_isr(union sigval arg)
 
 void interrupt_key_isr(int signal)
 {
+  delwin(seg7_wnd);
+  delwin(binary_wnd);
+  delwin(wnd);
+
+  endwin();
+  exit(0);
+
 }
 
 void TRIS_init(){}
@@ -157,9 +217,4 @@ void main(void)
   /** END LINUX SIM STUFF **/
   #include "clock_main.c"
 
-  delwin(seg7_wnd);
-  delwin(binary_wnd);
-  delwin(wnd);
-
-  endwin();
 }

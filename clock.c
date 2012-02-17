@@ -2,9 +2,12 @@
 #include "config.h"
 #endif
 
+#include "7seg.h"
+#include "utils.h"
 #include "picos_time.h"
 
 #include <stdbool.h>
+#include <stddef.h>
 
 bit use_hex_output;
 
