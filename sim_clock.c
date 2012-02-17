@@ -56,56 +56,73 @@ void putch(char c)
 
   //delch();
   //wclear(seg7_wnd);
-  box(seg7_wnd,ACS_VLINE,ACS_HLINE);
-  wmove(seg7_wnd, curr_line,1);
-  if(clock_get_display_side() == RIGHT)
-    curr_column += 12;
-  if(clock_get_digit() == RIGHT)
-    curr_column += 5;
-  if((display_data & 0x40) != 0)
-    mvwprintw(seg7_wnd,curr_line,curr_column," --- ");
-  else
-    mvwprintw(seg7_wnd,curr_line,curr_column,"     ");
-  curr_line++;
+  if(clock_get_display() == SEG7)
+    {
+      wclear(binary_wnd);
+      box(seg7_wnd,ACS_VLINE,ACS_HLINE);
+      wmove(seg7_wnd, curr_line,1);
+      if(clock_get_display_side() == RIGHT)
+	curr_column += 12;
+      if(clock_get_digit() == RIGHT)
+	curr_column += 5;
+      if((display_data & 0x40) != 0)
+	mvwprintw(seg7_wnd,curr_line,curr_column," --- ");
+      else
+	mvwprintw(seg7_wnd,curr_line,curr_column,"     ");
+      curr_line++;
 
-  if((display_data & 0x20) != 0)
-    mvwprintw(seg7_wnd,curr_line,curr_column,"|");
-  else
-    mvwprintw(seg7_wnd,curr_line,curr_column," ");
-  if((display_data & 0x02) != 0)
-    mvwprintw(seg7_wnd,curr_line,curr_column+4,"|");
-  else
-    mvwprintw(seg7_wnd,curr_line,curr_column+4," ");
-  curr_line++;
+      if((display_data & 0x20) != 0)
+	mvwprintw(seg7_wnd,curr_line,curr_column,"|");
+      else
+	mvwprintw(seg7_wnd,curr_line,curr_column," ");
+      if((display_data & 0x02) != 0)
+	mvwprintw(seg7_wnd,curr_line,curr_column+4,"|");
+      else
+	mvwprintw(seg7_wnd,curr_line,curr_column+4," ");
+      curr_line++;
 
-  if((display_data & 0x80) != 0)
-    mvwprintw(seg7_wnd,curr_line,curr_column," --- ");
-  else
-    mvwprintw(seg7_wnd,curr_line,curr_column,"     ");
-  curr_line++;
+      if((display_data & 0x80) != 0)
+	mvwprintw(seg7_wnd,curr_line,curr_column," --- ");
+      else
+	mvwprintw(seg7_wnd,curr_line,curr_column,"     ");
+      curr_line++;
 
-  if((display_data & 0x10) != 0)
-    mvwprintw(seg7_wnd,curr_line,curr_column,"|");
-  else
-    mvwprintw(seg7_wnd,curr_line,curr_column," ");
-  if((display_data & 0x04) != 0)
-    mvwprintw(seg7_wnd,curr_line,curr_column+4,"|");
-  else
-    mvwprintw(seg7_wnd,curr_line,curr_column+4," ");
-  curr_line++;
+      if((display_data & 0x10) != 0)
+	mvwprintw(seg7_wnd,curr_line,curr_column,"|");
+      else
+	mvwprintw(seg7_wnd,curr_line,curr_column," ");
+      if((display_data & 0x04) != 0)
+	mvwprintw(seg7_wnd,curr_line,curr_column+4,"|");
+      else
+	mvwprintw(seg7_wnd,curr_line,curr_column+4," ");
+      curr_line++;
 
-  if((display_data & 0x08) != 0)
-    mvwprintw(seg7_wnd,curr_line,curr_column," --- ");
-  else
-    mvwprintw(seg7_wnd,curr_line,curr_column,"     ");
-  curr_line++;
+      if((display_data & 0x08) != 0)
+	mvwprintw(seg7_wnd,curr_line,curr_column," --- ");
+      else
+	mvwprintw(seg7_wnd,curr_line,curr_column,"     ");
+      curr_line++;
 
 #if 0// do not use 7-seg  
-  if(display_data == 1)
-    mvwprintw(seg7_wnd,curr_line,curr_column+4,".");
-  else
-    mvwprintw(seg7_wnd,curr_line,curr_column+4," ");
+      if(display_data == 1)
+	mvwprintw(seg7_wnd,curr_line,curr_column+4,".");
+      else
+	mvwprintw(seg7_wnd,curr_line,curr_column+4," ");
 #endif
+    }
+  else
+    {
+      char binary_buffer[8];
+      wclear(seg7_wnd);
+      binary_to_octuplet(binary_buffer,display_data);
+      if(clock_get_display_side() == RIGHT)
+	curr_line++;
+      if(clock_get_digit() == RIGHT)
+	curr_column += 4;
+
+      mvwprintw(binary_wnd,curr_line,curr_column,"%s",&binary_buffer[4]);
+      
+    }
   
   update_curses();
 
