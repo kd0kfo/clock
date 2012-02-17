@@ -1,3 +1,7 @@
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 // PIC/SIM independent
 extern bit use_hex_output;
 

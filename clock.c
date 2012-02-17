@@ -1,4 +1,6 @@
-#include "clock.h"
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "picos_time.h"
 
@@ -6,6 +8,7 @@
 
 bit use_hex_output;
 
+void tone_440(){}
 void TIME_init()
 {
   TIME_t new_time;

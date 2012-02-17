@@ -1,5 +1,9 @@
-#include "clock.h"
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
 
+#include "picfs_error.h"
+#include "scheduler.h"
 #include "picos_time.h"
 #include "version.h"
 
@@ -13,7 +17,12 @@
 #include <stdlib.h>
 #include <errno.h>
 
+bit use_hex_output;
 WINDOW *wnd = NULL, *seg7_wnd = NULL, *binary_wnd = NULL, *debug_wnd = NULL;
+#define SEG7_WIDTH  10
+#define SEG7_HEIGHT  10
+#define BINARY_WIDTH  10
+#define BINARY_HEIGHT  10
 
 void update_curses()
 {
@@ -36,52 +45,15 @@ void clear_output()
 
 
 char display_data = 0;
+void set_display_data(char val){}
 void putch(char c)
 { 
   putch_clock_display(c);
   
   
   //delch();
-  box(lcd_wnd,ACS_VLINE,ACS_HLINE);
-  if(c == 8)
-    {
-      refresh();
-      return;
-    }
-  else if(c == 0x7f)
-    {
-      if(col == 0)
-	{
-	  col = TERM_WIDTH;
-	  row = (row == 0) ? TERM_HEIGHT - 1: row - 1;
-	}
-      col--;
-      wmove(lcd_wnd,row+row_offset,col+col_offset);
-      wdelch(lcd_wnd);
-      update_curses();
-      return;
-    }
-  else if(c == '\n')
-    {
-      row++;
-      if(row >= TERM_HEIGHT)
-	row = 0;
-      col = 0;
-      wmove(lcd_wnd,row+row_offset,col+col_offset);
-      update_curses();
-      return;
-    }
-  wmove(lcd_wnd,row+row_offset,col+col_offset);
-  wprintw(lcd_wnd,"%c",c);
-  col++;
-  if(col >= TERM_WIDTH)
-    {
-      row++;
-      if(row >= TERM_HEIGHT)
-	row = 0;
-      col = 0;
-    }
-  wmove(lcd_wnd,row+col_offset,col+col_offset);
+  box(seg7_wnd,ACS_VLINE,ACS_HLINE);
+  wprintw(seg7_wnd,"%c",c);
   update_curses();
 
 }
@@ -95,25 +67,17 @@ void interrupt_isr(union sigval arg)
     {
       IN_INTERRUPT = 1;
       TIME_tick();
-      if((curr_process.bitmap & PICLANG_BLOCKING_CALL) == 0)
-	{
-	  if(picos_curr_process >= 0 && picos_curr_process < PICOS_MAX_PROCESSES)
-	    if(picos_processes[picos_curr_process].expires > 0)
-	      picos_processes[picos_curr_process].expires--;
-	  if(picos_wait_queue >= 0 && picos_wait_queue < PICOS_MAX_PROCESSES)
-	    if(picos_processes[picos_wait_queue].expires > 0)
-	      picos_processes[picos_wait_queue].expires--;
-	}
       IN_INTERRUPT = 0;
     }
 }
 
 void interrupt_key_isr(int signal)
 {
-  signal_send(PICOS_SIGINT);
 }
 
 void TRIS_init(){}
+
+FILE *usart_fifo = NULL;
 void usart_init()
 {  
   usart_fifo = fopen("usart_fifo","w+");
@@ -161,52 +125,8 @@ void TIME_init()
 }
 
 
-FILE *sd_card, *fake_sram, *fake_eeprom;
-void SPI_init(){}
-
-void SD_read(picos_addr_t addr, void *buffer, char n)
-{
-  if(buffer == NULL)
-    return;
-  fseek(sd_card,addr,SEEK_SET);
-  fread(buffer,sizeof(FS_Unit),n,sd_card);
-}
-
-
-void SD_write(picos_addr_t addr, void *buff, char size)
-{
-  if(buff == NULL)
-    return;
-  fseek(sd_card,addr,SEEK_SET);
-  while(size > 0)
-    {
-      fwrite(buff++,sizeof(char),1,sd_card);
-      size--;
-    }
-  fflush(sd_card);
-}
-
-void SRAM_read(unsigned int addr, void *buffer, char n)
-{
-  fseek(fake_sram,addr,SEEK_SET);
-  fread(buffer,sizeof(FS_Unit),n,fake_sram);
-}
-
-void SRAM_write(unsigned int addr, const void *buffer, char n)
-{
-  fseek(fake_sram,addr,SEEK_SET);
-  fwrite(buffer,sizeof(FS_Unit),n,fake_sram);
-  fflush(fake_sram);
-}
-
-void startup_message()
-{
-  signed char fh = picfs_open("start",curr_dir);
-  if(fh != -1)
-    PICLANG_load((file_handle_t)fh);
-
-  error_code = 0;
-}
+FILE *fake_eeprom;
+void tone_440(){}
 
 void main(void)
 {
@@ -215,34 +135,15 @@ void main(void)
   wnd = initscr();
   noecho();
   keypad(wnd,true);
-  mvwprintw(wnd,0,1,"LCD");
-  lcd_wnd = subwin(wnd,TERM_HEIGHT+2,TERM_WIDTH+2,1,1);
-  box(lcd_wnd,0,0);
+  mvwprintw(wnd,0,1,"7seg");
+  seg7_wnd = subwin(wnd,SEG7_HEIGHT+2,SEG7_WIDTH+2,1,1);
+  box(seg7_wnd,0,0);
 
-  mvwprintw(wnd,0,TERM_WIDTH+5,"Core");
-  core_wnd = subwin(wnd,CORE_HEIGHT,CORE_WIDTH,1,TERM_WIDTH+5);
-  box(core_wnd,ACS_VLINE,ACS_HLINE);
-
-  mvwprintw(wnd,CORE_HEIGHT+1,TERM_WIDTH+5,"Debug");
-  debug_wnd = subwin(wnd,4,CORE_WIDTH,CORE_HEIGHT+2,TERM_WIDTH+5);
-  box(debug_wnd,0,0);
-
-  mvwprintw(wnd,0,TERM_WIDTH+10 + CORE_WIDTH,"Scheduler");
-  wait_queue_wnd = subwin(wnd,SCHEDULER_HEIGHT,SCHEDULER_WIDTH,1,TERM_WIDTH+10 + CORE_WIDTH);
-  box(wait_queue_wnd,0,0);
-
-  mvwprintw(wnd,SCHEDULER_HEIGHT+1,TERM_WIDTH+10 + CORE_WIDTH,"PICFS Buffer");
-  picfs_buffer_wnd = subwin(wnd,SCHEDULER_HEIGHT,SCHEDULER_WIDTH,SCHEDULER_HEIGHT+2,TERM_WIDTH+10+CORE_WIDTH);
-  box(picfs_buffer_wnd,0,0);
+  mvwprintw(wnd,0,SEG7_WIDTH+5,"Binary");
+  binary_wnd = subwin(wnd,BINARY_HEIGHT,BINARY_WIDTH,1,SEG7_WIDTH+5);
+  box(binary_wnd,ACS_VLINE,ACS_HLINE);
 
   refresh();
-  sd_card = fopen("sdcard","r+");
-  if(sd_card == NULL)
-    {
-      fprintf(stderr,"Could not open fake sdcard\n");
-      exit(errno);
-    }
-
   fake_eeprom = fopen("fake_eeprom","r+");
   if(fake_eeprom == NULL)
     {
@@ -250,23 +151,15 @@ void main(void)
       exit(errno);
     }
 
-  remove("fake_sram");
-  fake_sram = fopen("fake_sram","w+");
-  if(fake_sram == NULL)
-    {
-      fprintf(stderr,"Could not open fake sram\n");
-      exit(errno);
-    }
-
   // Simulate interrupt key
   signal(SIGINT,interrupt_key_isr);
 
   /** END LINUX SIM STUFF **/
-  #include "2550_main.inc.c"
+  #include "clock_main.c"
 
-  delwin(lcd_wnd);
+  delwin(seg7_wnd);
+  delwin(binary_wnd);
   delwin(wnd);
 
-  ARG_clear();
   endwin();
 }
