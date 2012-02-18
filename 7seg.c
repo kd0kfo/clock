@@ -132,6 +132,10 @@ void update_display(char side, char val)
       dec_to_word(digits, val);
       write_addr += 3;
       break;
+    case OCT:
+      oct_to_word(digits, val);
+      write_addr += 1;
+      break;
     case HEX:default:
       hex_to_word(digits, val);
       break;
