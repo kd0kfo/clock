@@ -6,14 +6,76 @@
 #include "curses.h"
 #endif
 
+#include "input.h"
+#include "7seg.h"
+
+#include "picos_time.h"
 #include "picfs_error.h"
 
+#include <stdbool.h>
 
-signed char do_command(char command)
+char accumulator;
+
+/**
+ * Commands are the upper nibble of the char comm_arg parameter.
+ * The lower nibble is the argument to the command
+ */
+signed char do_command(char comm_arg)
 {
   signed char retval = SUCCESS;
+  char command,arg;
+  TIME_t the_time = *TIME_get();
+  if((comm_arg & RUN_COMMAND_MASK) == 0)
+    {
+      arg = comm_arg & 0xf;
+      if((comm_arg & MOVELWH_MASK) != 0)
+	command = MOVELWH;
+      else if((comm_arg & MOVELWL_MASK) != 0)
+	command = MOVELWL;
+    }
+  else
+    command = comm_arg & ~RUN_COMMAND_MASK;
+
   switch(command)
     {
+    case MOVELWH:
+      accumulator &= 0x0f;
+      accumulator |= (arg << 4);
+      break;
+    case MOVELWL:
+      accumulator &= 0xf0;
+      accumulator |= arg;
+      break;
+    case SET_HOUR:
+      the_time.hours = accumulator;
+      TIME_set(&the_time);
+      break;
+    case SET_MINUTES:
+      the_time.minutes = accumulator;
+      TIME_set(&the_time);
+      break;
+    case SET_SECONDS:
+      the_time.seconds = accumulator;
+      TIME_set(&the_time);
+      break;
+    case SET_MONTH:
+      the_time.month = accumulator;
+      TIME_set(&the_time);
+      break;
+    case SET_DAY:
+      the_time.day = accumulator;
+      TIME_set(&the_time);
+      break;
+    case SET_YEAR:
+      the_time.year = accumulator;
+      TIME_set(&the_time);
+      break;
+    case USE_HEX:
+      clock_set_display(SEG7);
+      break;
+    case USE_BINARY:
+      clock_set_display(BINARY);
+      break;
     default:
       retval = PICLANG_UNKNOWN_COMMAND;
       break;
@@ -21,4 +83,15 @@ signed char do_command(char command)
 
   return retval;
 }
+
+char should_do_command()
+{
+  if((button_state & RUN_COMMAND_MASK) != 0 ||
+    (button_state & MOVELWH_MASK) != 0 ||
+     (button_state & MOVELWL_MASK) != 0)
+    return true;
+  
+  return false;
+}
+
 

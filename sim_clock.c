@@ -3,6 +3,7 @@
 #endif
 
 #include "7seg.h"
+#include "input.h"
 
 #include "picfs_error.h"
 #include "scheduler.h"

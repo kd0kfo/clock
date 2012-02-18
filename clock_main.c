@@ -17,11 +17,11 @@
       if(last_time != time->seconds)
 	{
 	  clock_set_display_side(LEFT);
-	  hex_to_word(digits, time->minutes);
+	  hex_to_word(digits, time->hours);
 	  clock_write_double_digit(digits);
 	  
 	  clock_set_display_side(RIGHT);
-	  hex_to_word(digits, time->seconds);
+	  hex_to_word(digits, time->minutes);
 	  clock_write_double_digit(digits);
 	  
 	  poll_input();
@@ -31,7 +31,23 @@
 	      clear_output();
 	      while(edit_mode)
 		{
+
+		  if(should_do_command())
+		    {
+		      do_command(button_state);
+		      while(should_do_command() && edit_mode)
+			{
+			  poll_input();
+			  continue;
+			}
+		    }
+		    
+		  
 		  clock_set_display_side(LEFT);
+		  hex_to_word(digits,accumulator);
+		  clock_write_double_digit(digits);
+		  
+		  clock_set_display_side(RIGHT);
 		  hex_to_word(digits,button_state);
 		  clock_write_double_digit(digits);
 		  poll_input();
