@@ -19,5 +19,7 @@ char clock_get_display_side();
 
 void clock_write_double_digit(const char *digits);
 
+void update_display(char side, char val);
+
 #endif
 

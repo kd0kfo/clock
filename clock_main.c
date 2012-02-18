@@ -1,6 +1,5 @@
 {
   const TIME_t *time = NULL;
-  char digits[2];
   char last_time = 0;
   char input;
 
@@ -17,23 +16,13 @@
 	{
 	  if(to_be_displayed == SHOW_TIME)
 	    {
-	      clock_set_display_side(LEFT);
-	      hex_to_word(digits, time->hours);
-	      clock_write_double_digit(digits);
-	  
-	      clock_set_display_side(RIGHT);
-	      hex_to_word(digits, time->minutes);
-	      clock_write_double_digit(digits);
+	      update_display(LEFT,time->hours);
+	      update_display(RIGHT, time->minutes);
 	    }
 	  else if(to_be_displayed == SHOW_DATE)
 	    {
-	      clock_set_display_side(LEFT);
-	      hex_to_word(digits, time->month);
-	      clock_write_double_digit(digits);
-	  
-	      clock_set_display_side(RIGHT);
-	      hex_to_word(digits, time->day);
-	      clock_write_double_digit(digits);
+	      update_display(LEFT, time->month);
+	      update_display(RIGHT, time->day);
 	    }
 	  
 	  poll_input();
@@ -55,13 +44,9 @@
 		    }
 		    
 		  
-		  clock_set_display_side(LEFT);
-		  hex_to_word(digits,accumulator);
-		  clock_write_double_digit(digits);
-		  
-		  clock_set_display_side(RIGHT);
-		  hex_to_word(digits,button_state);
-		  clock_write_double_digit(digits);
+		  update_display(LEFT, accumulator);
+		  update_display(RIGHT, button_state);
+
 		  poll_input();
 		  continue;
 		}// END EDIT INPUT WHILE LOOP

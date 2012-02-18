@@ -4,6 +4,9 @@
 extern char accumulator;
 extern char to_be_displayed;
 
+enum{HEX=0,OCT,DEC};// RADIX
+char get_radix();
+
 extern char poll_input();
 char should_do_command();
 
@@ -18,6 +21,8 @@ char should_do_command();
 #define SET_YEAR 7
 #define SHOW_DATE 8
 #define SHOW_TIME 9
+#define SET_RADIX 10// Sets the radix to the value of the accumulator
+#define GET_RADIX 11// Puts radix in the accumulator
 #define MOVELWL 0x20// Move literal to lower nibble of accumulator
 #define MOVELWH 0x40// Move literal to upper nibble of accumulator
 

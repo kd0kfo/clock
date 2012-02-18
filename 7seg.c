@@ -117,3 +117,15 @@ void clock_write_double_digit(const char *digits)
   putch(digits[1]);
 }
 
+void update_display(char side, char val)
+{
+  char digits[5];
+
+  clock_set_display_side(side);
+  hex_to_word(digits, val);
+  clock_write_double_digit(digits);
+
+}
+
+
+

@@ -15,6 +15,7 @@
 #include <stdbool.h>
 
 char accumulator;
+char radix = HEX;
 char to_be_displayed = SHOW_TIME;
 
 /**
@@ -80,6 +81,12 @@ signed char do_command(char comm_arg)
     case SHOW_DATE:case SHOW_TIME:
       to_be_displayed = command;
       break;
+    case SET_RADIX:
+      set_radix(accumulator);
+      break;
+    case GET_RADIX:
+      accumulator = get_radix();
+      break;
     default:
       retval = PICLANG_UNKNOWN_COMMAND;
       break;
@@ -98,4 +105,19 @@ char should_do_command()
   return false;
 }
 
+char get_radix()
+{
+  return radix;
+}
+
+void set_radix(char new_radix)
+{
+  switch(new_radix)
+    {
+    case HEX:case OCT:case DEC:
+      radix = new_radix;
+    default:
+      break;
+    }
+}
 
