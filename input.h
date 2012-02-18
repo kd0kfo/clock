@@ -2,6 +2,7 @@
 #define INPUT_H 1
 
 extern char accumulator;
+extern char to_be_displayed;
 
 extern char poll_input();
 char should_do_command();
@@ -15,10 +16,12 @@ char should_do_command();
 #define SET_MONTH 5
 #define SET_DAY 6
 #define SET_YEAR 7
+#define SHOW_DATE 8
+#define SHOW_TIME 9
 #define MOVELWL 0x20// Move literal to lower nibble of accumulator
 #define MOVELWH 0x40// Move literal to upper nibble of accumulator
 
-
+// Bit flags
 #define RUN_COMMAND_MASK 0x80
 #define MOVELWH_MASK MOVELWH
 #define MOVELWL_MASK MOVELWL

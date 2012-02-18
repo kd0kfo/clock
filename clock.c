@@ -9,8 +9,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-bit use_hex_output;
-
 void tone_440(){}
 void TIME_init()
 {

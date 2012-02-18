@@ -7,7 +7,6 @@
   TIME_init();
   time = TIME_get();
   last_time = time->seconds;
-  use_hex_output = true;
 
   clock_set_display(BINARY);
   //clock_set_display(SEG7);
@@ -16,13 +15,26 @@
     {
       if(last_time != time->seconds)
 	{
-	  clock_set_display_side(LEFT);
-	  hex_to_word(digits, time->hours);
-	  clock_write_double_digit(digits);
+	  if(to_be_displayed == SHOW_TIME)
+	    {
+	      clock_set_display_side(LEFT);
+	      hex_to_word(digits, time->hours);
+	      clock_write_double_digit(digits);
 	  
-	  clock_set_display_side(RIGHT);
-	  hex_to_word(digits, time->minutes);
-	  clock_write_double_digit(digits);
+	      clock_set_display_side(RIGHT);
+	      hex_to_word(digits, time->minutes);
+	      clock_write_double_digit(digits);
+	    }
+	  else if(to_be_displayed == SHOW_DATE)
+	    {
+	      clock_set_display_side(LEFT);
+	      hex_to_word(digits, time->month);
+	      clock_write_double_digit(digits);
+	  
+	      clock_set_display_side(RIGHT);
+	      hex_to_word(digits, time->day);
+	      clock_write_double_digit(digits);
+	    }
 	  
 	  poll_input();
 
@@ -52,11 +64,8 @@
 		  clock_write_double_digit(digits);
 		  poll_input();
 		  continue;
-		}
-	      do_command(button_state);
-	    }
-
-	  
-	}
-    }
-}
+		}// END EDIT INPUT WHILE LOOP
+	    }// END EDIT MODE
+	}// END CLOCK DISPLAY UPDATE
+    }// INFINITE LOOP
+}// MAIN BLOCK

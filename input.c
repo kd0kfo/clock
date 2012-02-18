@@ -15,6 +15,7 @@
 #include <stdbool.h>
 
 char accumulator;
+char to_be_displayed = SHOW_TIME;
 
 /**
  * Commands are the upper nibble of the char comm_arg parameter.
@@ -75,6 +76,9 @@ signed char do_command(char comm_arg)
       break;
     case USE_BINARY:
       clock_set_display(BINARY);
+      break;
+    case SHOW_DATE:case SHOW_TIME:
+      to_be_displayed = command;
       break;
     default:
       retval = PICLANG_UNKNOWN_COMMAND;

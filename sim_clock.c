@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <errno.h>
 
-bit use_hex_output;
 WINDOW *wnd = NULL, *seg7_wnd = NULL, *binary_wnd = NULL, *button_wnd = NULL;
 #define SEG7_WIDTH  25
 #define SEG7_HEIGHT  5

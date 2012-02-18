@@ -6,9 +6,6 @@
 
 #include <stddef.h>
 
-// PIC/SIM independent
-extern bit use_hex_output;
-
 const char table_7seg[] = {
   0b01111110/*0*/,
   0b00000110/*1*/,
