@@ -57,7 +57,16 @@ void interrupt isr()
     }
 }
 
-void set_display_data(char val){ PORTC &= (val & 0xf) | 0xf0;}
+void set_display_data(char val)
+{ 
+  char counter;
+  counter = 0;
+  for(;counter<8;counter++,val >>= 1)
+    {
+      if((val & 1) != 0)
+	PORTC &= (0xf8 | counter);
+    }
+}
 
 void clear_output()
 {
