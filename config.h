@@ -27,7 +27,6 @@
 
 // define putch
 #define putch(X) putch_clock_display(X)
-extern int getch();
 #else // NOT LINUX_SIM
 
 typedef int bit;

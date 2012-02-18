@@ -6,6 +6,7 @@ extern char to_be_displayed;
 
 enum{HEX=0,OCT,DEC};// RADIX
 char get_radix();
+void set_radix(char new_radix);
 
 extern char poll_input();
 char should_do_command();

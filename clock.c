@@ -3,11 +3,19 @@
 #endif
 
 #include "7seg.h"
+#include "input.h"
+
+#include "io.h"
 #include "utils.h"
+#include "picfs_error.h"
+#include "scheduler.h"
 #include "picos_time.h"
+#include "version.h"
 
 #include <stdbool.h>
 #include <stddef.h>
+
+__CONFIG(FOSC_EXTRC & WDTE_OFF & PWRTE_OFF & CP_OFF & BOREN_ON & LVP_OFF);
 
 void tone_440(){}
 void TIME_init()
@@ -51,11 +59,24 @@ void interrupt isr()
 
 void set_display_data(char val){ PORTC &= (val & 0xf) | 0xf0;}
 
-char getch()
+void clear_output()
 {
-  return BTN_PORT;
 }
 
+char poll_input()
+{
+  char buffer = BTN_PORT;
+  char edit = (EDIT_BUTTON == 1), edit2;
+  
+  __delay_ms(20);
+
+  button_state ^= buffer & BTN_PORT;
+  
+  edit2 = (EDIT_BUTTON == 1);
+  edit_mode ^= edit & edit2;
+  
+  return SUCCESS;
+}
 
 int main()
 {

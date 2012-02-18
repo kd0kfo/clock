@@ -4,6 +4,7 @@
 
 #include "7seg.h"
 #include "input.h"
+#include "utils.h"
 
 #include <stddef.h>
 
