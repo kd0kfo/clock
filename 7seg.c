@@ -3,6 +3,7 @@
 #endif
 
 #include "7seg.h"
+#include "input.h"
 
 #include <stddef.h>
 
@@ -120,10 +121,23 @@ void clock_write_double_digit(const char *digits)
 void update_display(char side, char val)
 {
   char digits[5];
-
+  char *write_addr = digits;
+  char radix;
+  extern char get_radix();
+  
   clock_set_display_side(side);
-  hex_to_word(digits, val);
-  clock_write_double_digit(digits);
+  switch(get_radix())
+    {
+    case DEC:
+      dec_to_word(digits, val);
+      write_addr += 3;
+      break;
+    case HEX:default:
+      hex_to_word(digits, val);
+      break;
+    }
+  
+  clock_write_double_digit(write_addr);
 
 }
 
