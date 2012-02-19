@@ -8,6 +8,8 @@
 
 #include <stddef.h>
 
+static char display_side = LEFT;
+
 const char table_7seg[] = {
   0b01111110/*0*/,
   0b00000110/*1*/,
@@ -75,37 +77,20 @@ char clock_get_display()
   
 }
 
-void clock_set_digit(char digit)
-{
-  if(digit == LEFT)
-    DISPLAY_PORT |= DIGIT_MASK;
-  else
-    DISPLAY_PORT &= ~DIGIT_MASK;
-
-}
-
-char clock_get_digit()
-{
-  if((DISPLAY_PORT & DIGIT_MASK) == 0)
-    return RIGHT;
-
-  return LEFT;
-}
-
 void clock_set_display_side(char display)
 {
-  if(display == LEFT)
-    DISPLAY_PORT |= DISPLAY_SIDE_MASK;
-  else
-    DISPLAY_PORT &= ~DISPLAY_SIDE_MASK;
+  switch(display)
+    {
+    case LEFT: case RIGHT:
+      display_side = display;
+    default:
+      break;
+    }
 }
 
 char clock_get_display_side()
 {
-  if((DISPLAY_PORT & DISPLAY_SIDE_MASK) == 0)
-    return RIGHT;
-  return LEFT;
-  
+  return display_side;
 }
 
 void clock_write_double_digit(const char *digits)

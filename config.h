@@ -8,6 +8,8 @@
 #define TMR0_PERIOD 0xc4
 
 // Dip switches
+#define BTN_TRIS TRISB
+#define BTN_TRIS_MASK 0xff
 #define BTN_PORT PORTB
 #define BTN1 RB0
 #define BTN2 RB1
@@ -19,9 +21,13 @@
 #define BTN8 RB7
 
 #define EDIT_BUTTON RA0
+#define EDIT_BUTTON_TRIS TRISA
+#define EDIT_BUTTON_TRIS_MASK 0x1
 
 // display
 #define DISPLAY_PORT PORTC
+#define DISPLAY_TRIS TRISC
+#define DISPLAY_TRIS_MASK 0
 
 #define ERR 0xff
 
