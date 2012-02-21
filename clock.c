@@ -59,21 +59,21 @@ void interrupt isr()
 
 void set_display_data(char val)
 { 
-  char counter;
+  char counter, high_nibble = 0;
   
   if(clock_get_display() == BINARY)
     {
       if(clock_get_display_side() == LEFT)// top
-	DISPLAY_PORT |= BINARY_SIDE_MASK;
+	high_nibble |= BINARY_SIDE_MASK;
       else
-	DISPLAY_PORT &= ~BINARY_SIDE_MASK;
+	high_nibble &= ~BINARY_SIDE_MASK;
     }
   else
     {
       if(clock_get_display_side() == LEFT)
 	{
-	  DISPLAY_PORT &= ~SEG7_LEFT_INH_MASK;
-	  DISPLAY_PORT |= SEG7_RIGHT_INH_MASK;
+	  high_nibble &= ~SEG7_LEFT_INH_MASK;
+	  high_nibble |= SEG7_RIGHT_INH_MASK;
 	}
     }
 
@@ -82,7 +82,10 @@ void set_display_data(char val)
   for(;counter<8;counter++,val >>= 1)
     {
       if((val & 1) != 0)
-	PORTC &= (0xf0 | counter);
+	{
+	  PORTC = (high_nibble | counter);
+	  __delay_ms(5);
+	}
     }
 }
 
