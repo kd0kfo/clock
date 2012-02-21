@@ -8,7 +8,7 @@
 
 #include <stddef.h>
 
-static char display_side = LEFT;
+static char display_side = LEFT, display_digit = RIGHT;
 
 const char table_7seg[] = {
   0b01111110/*0*/,
@@ -91,6 +91,22 @@ void clock_set_display_side(char display)
 char clock_get_display_side()
 {
   return display_side;
+}
+
+void clock_set_digit(char digit)
+{
+  switch(digit)
+    {
+    case LEFT: case RIGHT:
+      display_digit = digit;
+    default:
+      break;
+    }
+}
+
+char clock_get_digit()
+{
+  return display_digit;
 }
 
 void clock_write_double_digit(const char *digits)

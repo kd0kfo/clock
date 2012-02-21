@@ -75,6 +75,8 @@ void set_display_data(char val)
 	  high_nibble &= ~SEG7_LEFT_INH_MASK;
 	  high_nibble |= SEG7_RIGHT_INH_MASK;
 	}
+      if(clock_get_digit() == LEFT)
+	high_nibble |= SEG7_LEFT_DIGIT_MASK;
     }
 
 

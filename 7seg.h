@@ -8,6 +8,7 @@ enum {BINARY = 0, SEG7};
 #define SEG7_LEFT_INH_MASK 0x80// If this bit is set, the left display is inhibited
 #define SEG7_RIGHT_INH_MASK 0x10// If this bit is set, the right display is inhibited
 #define DISPLAY_TYPE_MASK 0x40// If this bit is set, binary is used, otherwise 7seg is used.
+#define SEG7_LEFT_DIGIT_MASK 0x08// If the bit is set and the 7-seg is used, the left digit will be used
 
 void clock_set_display(char display);
 char clock_get_display();
