@@ -3,12 +3,13 @@
   char last_time = 0;
   char input;
 
+  TRIS_init();
   TIME_init();
   time = TIME_get();
   last_time = time->seconds;
 
-  clock_set_display(BINARY);
-  //clock_set_display(SEG7);
+  //clock_set_display(BINARY);
+  clock_set_display(SEG7);
 
   while(true)
     {
@@ -24,7 +25,7 @@
 	      update_display(LEFT, time->month);
 	      update_display(RIGHT, time->day);
 	    }
-	  
+
 	  poll_input();
 
 	  if(edit_mode)

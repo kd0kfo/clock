@@ -24,11 +24,11 @@ char should_do_command();
 #define SHOW_TIME 9
 #define SET_RADIX 10// Sets the radix to the value of the accumulator
 #define GET_RADIX 11// Puts radix in the accumulator
-#define MOVELWL 0x20// Move literal to lower nibble of accumulator
-#define MOVELWH 0x40// Move literal to upper nibble of accumulator
+#define MOVELWL 0x10// Move literal to lower nibble of accumulator
+#define MOVELWH 0x20// Move literal to upper nibble of accumulator
 
 // Bit flags
-#define RUN_COMMAND_MASK 0x80
+#define RUN_COMMAND_MASK 0x40
 #define MOVELWH_MASK MOVELWH
 #define MOVELWL_MASK MOVELWL
 

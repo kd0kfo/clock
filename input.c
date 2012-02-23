@@ -97,6 +97,7 @@ signed char do_command(char comm_arg)
 
 char should_do_command()
 {
+  extern char button_state;
   if((button_state & RUN_COMMAND_MASK) != 0 ||
     (button_state & MOVELWH_MASK) != 0 ||
      (button_state & MOVELWL_MASK) != 0)

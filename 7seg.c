@@ -8,7 +8,7 @@
 
 #include <stddef.h>
 
-static char display_side = LEFT, display_digit = RIGHT;
+static char display_side = LEFT, display_digit = RIGHT, display_type = SEG7;
 
 const char table_7seg[] = {
   0b01111110/*0*/,
@@ -35,46 +35,38 @@ void putch_clock_display(char ch)
 {
   extern void set_display_data(char val);
 
-  if(clock_get_display() == SEG7)
-    {
-      if(ch >= '0' && ch <= '9')
-	set_display_data(table_7seg[ch-'0']);
-      else if(ch >= 'A' && ch <= 'F')
-	set_display_data(table_7seg[ch-'A'+10]);
-      else if(ch >= 'a' && ch <= 'f')
-	set_display_data(table_7seg[ch-'a'+10]);
-      else
-	set_display_data(table_7seg[16]);
-    }
+  if(ch >= '0' && ch <= '9')
+    ch -= '0';
+  else if(ch >= 'A' && ch <= 'F')
+    ch = ch - 'A'+10;
+  else if(ch >= 'a' && ch <= 'f')
+    ch = ch - 'a'+10;
   else
-    {
-      if(ch >= '0' && ch <= '9')
-	set_display_data(ch-'0');
-      else if(ch >= 'A' && ch <= 'F')
-	set_display_data(ch-'A'+10);
-      else if(ch >= 'a' && ch <= 'f')
-	set_display_data(ch-'a'+10);
-      else
-	set_display_data(0);
-    }
+    ch = 16;
+
+  if(ch > 16)
+    ch = 16;// failover to decimal
+
+  if(clock_get_display() == SEG7)// 7seg uses bitmap, binary uses real value.
+    set_display_data(table_7seg[ch]);
+  else
+    set_display_data(ch);
 }
 
 void clock_set_display(char type)
 {
-  if(type == BINARY)
-    DISPLAY_PORT |= DISPLAY_TYPE_MASK;
-  else
-    DISPLAY_PORT &= ~DISPLAY_TYPE_MASK;
-
+  switch(type)
+    {
+    case BINARY: case SEG7:
+      display_type = type;
+    default:
+	break;
+    }
 }
 
 char clock_get_display()
 {
-  if((DISPLAY_PORT & DISPLAY_TYPE_MASK) == 0)
-    return SEG7;
-  
-  return BINARY;
-  
+  return display_type;
 }
 
 void clock_set_display_side(char display)

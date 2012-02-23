@@ -33,6 +33,7 @@ void TIME_init()
   T0CS = 1;// Transistion based on T0CLK pin
   T0IE = 1;// Increment on high to low
   T0SE = 0;
+  T0IF = 0;
   GIE = 1;
   TMR0 = TMR0_PERIOD;
 
@@ -40,10 +41,25 @@ void TIME_init()
 
 int getch()
 {
-  int button_buffer = BTN_PORT;
-  char edit_button_val = 0;
-  
-  return button_buffer;
+  extern char button_state;
+  char button_val_0 = BTN_PORT, button_val_1;
+  char edit_button_val_0 = EDIT_BUTTON, edit_button_val_1;
+
+  __delay_ms(10);// wait to debounce
+
+  button_val_1 = BTN_PORT;
+  edit_button_val_1 = EDIT_BUTTON;
+
+#if 0
+  button_state = (button_val_0 & button_val_1) | (button_val_0 ^ ~button_val_1);
+  edit_mode = (edit_button_val_0 & edit_button_val_1) | (edit_button_val_0 ^ ~edit_button_val_1);
+#else
+  button_state = (button_val_0 & button_val_1);
+  edit_mode = (edit_button_val_0 & edit_button_val_1);
+#endif
+  edit_mode &= 1;
+
+  return (int)button_state;
   
 }
 
@@ -64,9 +80,16 @@ void set_display_data(char val)
   if(clock_get_display() == BINARY)
     {
       if(clock_get_display_side() == LEFT)// top
-	high_nibble |= BINARY_SIDE_MASK;
+	high_nibble = DISPLAY_TYPE_MASK  | BINARY_SIDE_MASK;
       else
-	high_nibble &= ~BINARY_SIDE_MASK;
+	high_nibble = DISPLAY_TYPE_MASK & ~BINARY_SIDE_MASK;
+      
+      if(clock_get_digit() == LEFT)
+	{
+	  val <<=4;
+	  val &= 0x3f;
+	}
+      DISPLAY_PORT = val | high_nibble;
     }
   else
     {
@@ -75,8 +98,15 @@ void set_display_data(char val)
 	  high_nibble &= ~SEG7_LEFT_INH_MASK;
 	  high_nibble |= SEG7_RIGHT_INH_MASK;
 	}
+      else
+	{
+	  high_nibble &= ~SEG7_RIGHT_INH_MASK;
+	  high_nibble |= SEG7_LEFT_INH_MASK;
+	}
       if(clock_get_digit() == LEFT)
 	high_nibble |= SEG7_LEFT_DIGIT_MASK;
+      
+      high_nibble &= ~DISPLAY_TYPE_MASK;// sets 7-seg
     }
 
 
@@ -86,7 +116,7 @@ void set_display_data(char val)
       if((val & 1) != 0)
 	{
 	  PORTC = (high_nibble | counter);
-	  __delay_ms(5);
+	  //__delay_ms(5);
 	}
     }
 }
@@ -97,16 +127,7 @@ void clear_output()
 
 char poll_input()
 {
-  char buffer = BTN_PORT;
-  char edit = (EDIT_BUTTON == 1), edit2;
-  
-  __delay_ms(20);
-
-  button_state ^= buffer & BTN_PORT;
-  
-  edit2 = (EDIT_BUTTON == 1);
-  edit_mode ^= edit & edit2;
-  
+  getch();
   return SUCCESS;
 }
 
@@ -115,12 +136,25 @@ void TRIS_init()
   BTN_TRIS = BTN_TRIS_MASK;
   DISPLAY_TRIS = DISPLAY_TRIS_MASK;
   EDIT_BUTTON_TRIS = EDIT_BUTTON_TRIS_MASK;
+
+  TMR0_TRIS |= TMR0_TRIS_MASK;
+  ADCON1 = 0x6;
 }
 
-#define DEBUG
+char getval()
+{
+#if 1
+  //tmp = getch();tmp = ((tmp & 0x30) >> 4) + 0x30;
+  return ((char)(getch() & 0xff)) + 0x30;
+#else
+      return '8';
+#endif
+}
+
+// #define DEBUG
 int main()
 {
-
+  char tmp,tmp2;
 #ifndef DEBUG
   #include "clock_main.c"
 #else
@@ -128,7 +162,6 @@ int main()
   TRIS_init();
 
   clock_set_display(SEG7);
-  clock_set_display_side(LEFT);
   while(true)
     {
       // 0xc3 = 1100 0011 <--- binary top
@@ -142,7 +175,37 @@ int main()
       // RC4 = Not 7seg right (data with binary)
       //DISPLAY_PORT = SEG7_LEFT_INH_MASK | 0x03;
       //DISPLAY_PORT = DISPLAY_TYPE_MASK | BINARY_SIDE_MASK | 0x03;
-      putch('1');
+      clock_set_display_side(LEFT);
+      clock_set_digit(LEFT);
+      tmp = (char)(getch() & 0xff);
+      tmp2 = ((tmp & 0xf0) >> 4);
+      if(tmp2 > 9)
+	tmp2 += 'a' - 10;
+      else
+	tmp2 += '0';
+      putch(tmp2);
+      clock_set_digit(RIGHT);
+      tmp2 = (tmp & 0xf);
+      if(tmp2 > 9)
+	tmp2 += 'a' - 10;
+      else
+	tmp2 += '0';
+      putch(tmp2);
+      clock_set_display_side(RIGHT);
+      clock_set_digit(LEFT);
+      tmp2 = ((tmp & 0xf0) >> 4);
+      if(tmp2 > 9)
+	tmp2 += 'a' - 10;
+      else
+	tmp2 += '0';
+      putch(tmp2);
+      clock_set_digit(RIGHT);
+      tmp2 = (tmp & 0xf);
+      if(tmp2 > 9)
+	tmp2 += 'a'-10;
+      else
+	tmp2 += '0';
+      putch(tmp2);
     }
 
   
