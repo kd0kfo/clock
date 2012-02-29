@@ -26,6 +26,8 @@
 	      update_display(RIGHT, time->day);
 	    }
 
+	  refresh_display();
+
 	  poll_input();
 
 	  if(edit_mode)

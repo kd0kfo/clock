@@ -88,13 +88,15 @@ char poll_input()
 
 
 char display_data = 0;
-void set_display_data(char val){display_data = val;}
 void putch(char c)
 { 
-  int curr_line = 1,curr_column = 2;
   putch_clock_display(c);
-  
+}
 
+  
+void refresh_display()
+{
+  int curr_line = 1,curr_column = 2;
   //delch();
   //wclear(seg7_wnd);
   if(clock_get_display() == SEG7)

@@ -23,5 +23,7 @@ void clock_write_double_digit(const char *digits);
 
 void update_display(char side, char val);
 
+extern void refresh_display();
+
 #endif
 

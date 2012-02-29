@@ -7,8 +7,14 @@
 #include "utils.h"
 
 #include <stddef.h>
+#include <string.h>
 
 static char display_side = LEFT, display_digit = RIGHT, display_type = SEG7;
+
+char left_display_buffer[16];
+char right_display_buffer[16];
+char binary_display_buffer[2];
+char real_7seg_output[5];
 
 const char table_7seg[] = {
   0b01111110/*0*/,
@@ -31,26 +37,15 @@ const char table_7seg[] = {
 };
 
 
+void set_display_data();
+
 void putch_clock_display(char ch)
 {
-  extern void set_display_data(char val);
-
-  if(ch >= '0' && ch <= '9')
-    ch -= '0';
-  else if(ch >= 'A' && ch <= 'F')
-    ch = ch - 'A'+10;
-  else if(ch >= 'a' && ch <= 'f')
-    ch = ch - 'a'+10;
+  update_display(clock_get_display_side(), ch);
+  if(clock_get_display_side() == LEFT)
+    clock_set_display_side(RIGHT);
   else
-    ch = 16;
-
-  if(ch > 16)
-    ch = 16;// failover to decimal
-
-  if(clock_get_display() == SEG7)// 7seg uses bitmap, binary uses real value.
-    set_display_data(table_7seg[ch]);
-  else
-    set_display_data(ch);
+    clock_set_display_side(LEFT);
 }
 
 void clock_set_display(char type)
@@ -101,20 +96,9 @@ char clock_get_digit()
   return display_digit;
 }
 
-void clock_write_double_digit(const char *digits)
-{
-  if(digits == NULL)
-    return;
-  
-  clock_set_digit(LEFT);
-  putch(digits[0]);
-  clock_set_digit(RIGHT);
-  putch(digits[1]);
-}
-
 void update_display(char side, char val)
 {
-  char digits[5];
+  char *digits = real_7seg_output;
   char *write_addr = digits;
   char radix;
   extern char get_radix();
@@ -142,10 +126,105 @@ void update_display(char side, char val)
 	  break;
 	}
     }
-
-  clock_write_double_digit(write_addr);
-
+  
+    set_display_data();
 }
+
+void set_display_data()
+{ 
+  char bit_counter, buffer_counter, high_nibble = 0, val;
+  char *curr_buffer = NULL, *curr_word = NULL;// buffer is the actual DISPLAY_PORT values to be used. word is the human readable values to be converted to buffer.
+  
+  if(clock_get_display() == BINARY)
+    {
+      if(clock_get_display_side() == LEFT)// top
+	{
+	  high_nibble = DISPLAY_TYPE_MASK  | BINARY_SIDE_MASK;
+	  curr_buffer = binary_display_buffer;
+	}
+      else
+	{
+	  high_nibble = DISPLAY_TYPE_MASK & ~BINARY_SIDE_MASK;
+	  curr_buffer = binary_display_buffer + 1;
+	}
+      
+      if(clock_get_digit() == LEFT)
+	{
+	  val <<=4;
+	  val &= 0x3f;
+	}
+      *curr_buffer = val | high_nibble;
+      return;
+    }
+
+  // 7seg
+  if(clock_get_display_side() == LEFT)
+    {
+      high_nibble &= ~SEG7_LEFT_INH_MASK;
+      high_nibble |= SEG7_RIGHT_INH_MASK;
+      curr_buffer = left_display_buffer;
+    }
+  else
+    {
+      high_nibble &= ~SEG7_RIGHT_INH_MASK;
+      high_nibble |= SEG7_LEFT_INH_MASK;
+      curr_buffer = right_display_buffer;
+    }
+      
+  high_nibble &= ~DISPLAY_TYPE_MASK;// sets 7-seg
+
+  // Update buffer
+  curr_word = real_7seg_output;
+  if(curr_buffer == NULL || curr_word == NULL)//sanity check
+    return;
+  if(get_radix() == OCT)
+    curr_word += 1;
+  else if(get_radix() == DEC)
+    curr_word += 3;
+
+  memset(curr_buffer,0xff,16);
+
+  buffer_counter = 0;
+  for(;buffer_counter < 2;buffer_counter++)
+    {
+      if(buffer_counter == 0)//left first
+	{
+	  high_nibble |= SEG7_LEFT_DIGIT_MASK;
+	  val = curr_word[0];
+	}
+      else
+	{
+	  high_nibble ^= SEG7_LEFT_DIGIT_MASK;
+	  val = curr_word[1];// right digit
+	}
+
+      // Get 7seg bitmap
+      if(val >= '0' && val <= '9')
+	val -= '0';
+      else if(val >= 'A' && val <= 'F')
+	val = val - 'A'+10;
+      else if(val >= 'a' && val <= 'f')
+	val = val - 'a'+10;
+      else
+	val = 16;
+
+      if(val > 16)
+	val = 16;// failover to decimal
+      val = table_7seg[val];
+      
+      bit_counter = 0;
+      for(;bit_counter<8;bit_counter++,val >>= 1)
+	{
+	  if((val & 1) != 0)
+	    {
+	      *curr_buffer = (high_nibble | bit_counter);
+	      curr_buffer += 1;
+	    }
+	}
+    }
+}
+
+
 
 
 

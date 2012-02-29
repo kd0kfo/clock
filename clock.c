@@ -73,53 +73,6 @@ void interrupt isr()
     }
 }
 
-void set_display_data(char val)
-{ 
-  char counter, high_nibble = 0;
-  
-  if(clock_get_display() == BINARY)
-    {
-      if(clock_get_display_side() == LEFT)// top
-	high_nibble = DISPLAY_TYPE_MASK  | BINARY_SIDE_MASK;
-      else
-	high_nibble = DISPLAY_TYPE_MASK & ~BINARY_SIDE_MASK;
-      
-      if(clock_get_digit() == LEFT)
-	{
-	  val <<=4;
-	  val &= 0x3f;
-	}
-      DISPLAY_PORT = val | high_nibble;
-    }
-  else
-    {
-      if(clock_get_display_side() == LEFT)
-	{
-	  high_nibble &= ~SEG7_LEFT_INH_MASK;
-	  high_nibble |= SEG7_RIGHT_INH_MASK;
-	}
-      else
-	{
-	  high_nibble &= ~SEG7_RIGHT_INH_MASK;
-	  high_nibble |= SEG7_LEFT_INH_MASK;
-	}
-      if(clock_get_digit() == LEFT)
-	high_nibble |= SEG7_LEFT_DIGIT_MASK;
-      
-      high_nibble &= ~DISPLAY_TYPE_MASK;// sets 7-seg
-    }
-
-
-  counter = 0;
-  for(;counter<8;counter++,val >>= 1)
-    {
-      if((val & 1) != 0)
-	{
-	  PORTC = (high_nibble | counter);
-	  //__delay_ms(5);
-	}
-    }
-}
 
 void clear_output()
 {
