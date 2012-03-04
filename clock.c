@@ -109,7 +109,6 @@ void refresh_display()
   char index,buffer_index;
   char *buffer = NULL;
 
-  index = 0;
   buffer_index = 0;
   for(;buffer_index < 2;buffer_index++)
     {
@@ -117,7 +116,8 @@ void refresh_display()
 	buffer = left_display_buffer;
       else
 	buffer = right_display_buffer;
-     
+      
+      index = 0;
       for(;index < 16;index++)
 	{
 	  if(buffer[index] == 0xff)

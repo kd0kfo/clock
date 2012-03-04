@@ -26,15 +26,16 @@
 	      update_display(RIGHT, time->day);
 	    }
 	  last_time = time->minutes;
-	  poll_input();
 	}// END CLOCK DISPLAY UPDATE
 
       refresh_display();
 
-      
 
-	  if(edit_mode)
+	  if(EDIT_BUTTON)
 	    {
+	      char last_button_state = 0xff;
+	      last_button_state--;
+	      poll_input();
 	      clear_output();
 	      while(edit_mode)
 		{
@@ -49,10 +50,12 @@
 			}
 		    }
 		    
-		  
-		  update_display(LEFT, accumulator);
-		  update_display(RIGHT, button_state);
-
+		  if(last_button_state != button_state)
+		    {
+		      update_display(RIGHT, button_state);
+		      update_display(LEFT, accumulator);
+		    }
+		  refresh_display();
 		  poll_input();
 		  continue;
 		}// END EDIT INPUT WHILE LOOP
