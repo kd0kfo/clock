@@ -6,7 +6,7 @@
 #include <htc.h>
 
 // timer stuff
-#define TMR0_PERIOD 0xff//0xc4
+#define TMR0_PERIOD 0xc4
 #define TMR0_TRIS TRISA
 #define TMR0_TRIS_MASK 0x10//input
 
