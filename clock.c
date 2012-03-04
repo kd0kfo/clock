@@ -104,7 +104,31 @@ char getval()
 #endif
 }
 
-// #define DEBUG
+void refresh_display()
+{
+  char index,buffer_index;
+  char *buffer = NULL;
+
+  index = 0;
+  buffer_index = 0;
+  for(;buffer_index < 2;buffer_index++)
+    {
+      if(buffer_index)
+	buffer = left_display_buffer;
+      else
+	buffer = right_display_buffer;
+     
+      for(;index < 16;index++)
+	{
+	  if(buffer[index] == 0xff)
+	    break;
+	  DISPLAY_PORT = buffer[index];
+	}
+      
+    }
+}
+
+//#define DEBUG
 int main()
 {
   char tmp,tmp2;
@@ -128,40 +152,16 @@ int main()
       // RC4 = Not 7seg right (data with binary)
       //DISPLAY_PORT = SEG7_LEFT_INH_MASK | 0x03;
       //DISPLAY_PORT = DISPLAY_TYPE_MASK | BINARY_SIDE_MASK | 0x03;
-      clock_set_display_side(LEFT);
-      clock_set_digit(LEFT);
-      tmp = (char)(getch() & 0xff);
-      tmp2 = ((tmp & 0xf0) >> 4);
-      if(tmp2 > 9)
-	tmp2 += 'a' - 10;
-      else
-	tmp2 += '0';
-      putch(tmp2);
-      clock_set_digit(RIGHT);
-      tmp2 = (tmp & 0xf);
-      if(tmp2 > 9)
-	tmp2 += 'a' - 10;
-      else
-	tmp2 += '0';
-      putch(tmp2);
-      clock_set_display_side(RIGHT);
-      clock_set_digit(LEFT);
-      tmp2 = ((tmp & 0xf0) >> 4);
-      if(tmp2 > 9)
-	tmp2 += 'a' - 10;
-      else
-	tmp2 += '0';
-      putch(tmp2);
-      clock_set_digit(RIGHT);
-      tmp2 = (tmp & 0xf);
-      if(tmp2 > 9)
-	tmp2 += 'a'-10;
-      else
-	tmp2 += '0';
-      putch(tmp2);
-    }
+      
+      tmp = 0;
+      for(;tmp < 16;tmp++)
+	DISPLAY_PORT = 0xa0 | tmp;
 
-  
+      tmp = 0;
+      for(;tmp < 16;tmp++)
+	DISPLAY_PORT = 0x10 | tmp;
+      
+    }  
 
 #endif
 }

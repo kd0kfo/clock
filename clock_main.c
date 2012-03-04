@@ -6,14 +6,14 @@
   TRIS_init();
   TIME_init();
   time = TIME_get();
-  last_time = time->seconds;
+  last_time = time->minutes - 1;
 
   //clock_set_display(BINARY);
   clock_set_display(SEG7);
 
   while(true)
     {
-      if(last_time != time->seconds)
+      if(last_time != time->minutes)
 	{
 	  if(to_be_displayed == SHOW_TIME)
 	    {
@@ -25,10 +25,13 @@
 	      update_display(LEFT, time->month);
 	      update_display(RIGHT, time->day);
 	    }
-
-	  refresh_display();
-
+	  last_time = time->minutes;
 	  poll_input();
+	}// END CLOCK DISPLAY UPDATE
+
+      refresh_display();
+
+      
 
 	  if(edit_mode)
 	    {
@@ -54,6 +57,5 @@
 		  continue;
 		}// END EDIT INPUT WHILE LOOP
 	    }// END EDIT MODE
-	}// END CLOCK DISPLAY UPDATE
     }// INFINITE LOOP
 }// MAIN BLOCK

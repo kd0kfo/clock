@@ -160,14 +160,16 @@ void set_display_data()
   // 7seg
   if(clock_get_display_side() == LEFT)
     {
-      high_nibble &= ~SEG7_LEFT_INH_MASK;
-      high_nibble |= SEG7_RIGHT_INH_MASK;
+      /*high_nibble &= ~SEG7_LEFT_INH_MASK;
+	high_nibble |= SEG7_RIGHT_INH_MASK;*/
+      high_nibble = 0x10;
       curr_buffer = left_display_buffer;
     }
   else
     {
-      high_nibble &= ~SEG7_RIGHT_INH_MASK;
-      high_nibble |= SEG7_LEFT_INH_MASK;
+      /*high_nibble &= ~SEG7_RIGHT_INH_MASK;
+	high_nibble |= SEG7_LEFT_INH_MASK;*/
+      high_nibble = 0xa0;
       curr_buffer = right_display_buffer;
     }
       

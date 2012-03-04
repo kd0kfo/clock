@@ -2,6 +2,12 @@
 #define SEG7_H 1
 
 extern const char table_7seg[];
+
+extern char left_display_buffer[];
+extern char right_display_buffer[];
+extern char binary_display_buffer[];
+extern char real_7seg_output[];
+
 enum {LEFT = 0,RIGHT};
 enum {BINARY = 0, SEG7};
 #define BINARY_SIDE_MASK 0x80// If this bit is set, top is used, otherwise bottom is use.
