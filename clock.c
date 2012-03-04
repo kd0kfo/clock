@@ -67,7 +67,7 @@ void interrupt isr()
 {
   if(T0IF && T0IE)
     {
-      TIME_tick();
+      TIME_inc_minute();//TIME_tick();
       TMR0 = TMR0_PERIOD;
       T0IF = 0;
     }

@@ -87,7 +87,6 @@ char poll_input()
 }
 
 
-char display_data = 0;
 void putch(char c)
 { 
   putch_clock_display(c);
@@ -96,56 +95,69 @@ void putch(char c)
   
 void refresh_display()
 {
-  int curr_line = 1,curr_column = 2;
+  int curr_line =1,curr_side = 0,curr_column = 2, bit_counter;
+  char display_data, *display_data_ptr = left_display_buffer;
+  
+  const char right_side = 12,right_digit = 5;
+  const char top_row = 1, left_column = 2;
+  const char second_row = 1, third_row = 2, fourth_row = 3, fifth_row = 4;
+  char x;
+  
+  
   //delch();
   //wclear(seg7_wnd);
   if(clock_get_display() == SEG7)
     {
       wclear(binary_wnd);
+      wclear(seg7_wnd);
       box(seg7_wnd,ACS_VLINE,ACS_HLINE);
       wmove(seg7_wnd, curr_line,1);
-      if(clock_get_display_side() == RIGHT)
-	curr_column += 12;
-      if(clock_get_digit() == RIGHT)
-	curr_column += 5;
-      if((display_data & 0x40) != 0)
-	mvwprintw(seg7_wnd,curr_line,curr_column," --- ");
-      else
-	mvwprintw(seg7_wnd,curr_line,curr_column,"     ");
-      curr_line++;
 
-      if((display_data & 0x20) != 0)
-	mvwprintw(seg7_wnd,curr_line,curr_column,"|");
-      else
-	mvwprintw(seg7_wnd,curr_line,curr_column," ");
-      if((display_data & 0x02) != 0)
-	mvwprintw(seg7_wnd,curr_line,curr_column+4,"|");
-      else
-	mvwprintw(seg7_wnd,curr_line,curr_column+4," ");
-      curr_line++;
+      //setup display data
+      curr_side = 0;
+      for(;curr_side < 2;curr_side++)
+	{
+	  if(curr_side)
+	    display_data_ptr = right_display_buffer;
+	  bit_counter = 0;display_data = 0;
+	  for(;bit_counter < 8;bit_counter++,display_data_ptr++)
+	    {
+	      if(*display_data_ptr == 0xff)
+		break;
+	      x = curr_column;
+	      if((*display_data_ptr & SEG7_RIGHT_INH_MASK) == 0)
+		x += right_side;
+	      if((*display_data_ptr & SEG7_LEFT_DIGIT_MASK) == 0)
+		x += 5;
 
-      if((display_data & 0x80) != 0)
-	mvwprintw(seg7_wnd,curr_line,curr_column," --- ");
-      else
-	mvwprintw(seg7_wnd,curr_line,curr_column,"     ");
-      curr_line++;
-
-      if((display_data & 0x10) != 0)
-	mvwprintw(seg7_wnd,curr_line,curr_column,"|");
-      else
-	mvwprintw(seg7_wnd,curr_line,curr_column," ");
-      if((display_data & 0x04) != 0)
-	mvwprintw(seg7_wnd,curr_line,curr_column+4,"|");
-      else
-	mvwprintw(seg7_wnd,curr_line,curr_column+4," ");
-      curr_line++;
-
-      if((display_data & 0x08) != 0)
-	mvwprintw(seg7_wnd,curr_line,curr_column," --- ");
-      else
-	mvwprintw(seg7_wnd,curr_line,curr_column,"     ");
-      curr_line++;
-
+	      switch(*display_data_ptr & 0x7)
+		{
+		case 7:
+		  mvwprintw(seg7_wnd,x,top_row," --- ");
+		  refresh();break;
+		case 6:
+		  mvwprintw(seg7_wnd,x,second_row,"|");
+		  refresh();break;
+		case 1:
+		  mvwprintw(seg7_wnd,x,second_row+4,"|");
+		    touchwin(wnd);refresh();break;
+		case 8:
+		  mvwprintw(seg7_wnd,x,third_row," --- ");
+		  refresh();break;
+		case 5:
+		  mvwprintw(seg7_wnd,x,fourth_row,"|");
+		  refresh();break;
+		case 3:
+		  mvwprintw(seg7_wnd,x,fourth_row+4,"|");
+		  refresh();break;
+		case 4:
+		  mvwprintw(seg7_wnd,x,fifth_row," --- ");
+		  refresh();break;
+		default:
+		  break;
+		}//end of seg switch
+	    }// end of display side loop
+	}// end of display loop
 #if 0// do not use 7-seg  
       if(display_data == 1)
 	mvwprintw(seg7_wnd,curr_line,curr_column+4,".");
