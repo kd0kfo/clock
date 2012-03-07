@@ -34,6 +34,7 @@
 	  if(EDIT_BUTTON)
 	    {
 	      char last_button_state = 0xff;
+	      last_time = 0xff;// This will refresh the display once it leaves the edit loop
 	      last_button_state--;
 	      poll_input();
 	      clear_output();
