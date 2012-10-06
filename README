@@ -1,0 +1,8 @@
+clock
+=====
+
+Firmware for Binary/Hex/Octal Clock
+
+Requires picos (http://wiki.davecoss.com/Picos).
+
+Emulator has been developed for Linux. YMMV.
