@@ -1,3 +1,16 @@
+/**
+ * Binary/Hex/Octal Clock
+ * 
+ * Firmware for  the Binary/Hex/Octal Clock
+ * http://clock.davecoss.com
+ *
+ * Author: David Coss, PhD
+ * Date: 6 Oct 2012
+ *
+ * License: GNU Public License version 3.0 (see http://www.gnu.org)
+ *
+ * This file has the code for the abstract IO functions.
+ */
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
