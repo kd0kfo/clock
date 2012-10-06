@@ -273,7 +273,7 @@ void TIME_init()
 FILE *fake_eeprom;
 void tone_440(){}
 
-void main(void)
+int main(void)
 {
   /** LINUX SIM SETUP **/
   usart_init();
@@ -308,4 +308,5 @@ void main(void)
   /** END LINUX SIM STUFF **/
   #include "clock_main.c"
 
+  return 0;
 }
